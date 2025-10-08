@@ -102,28 +102,134 @@ export default function Exportacao() {
     XLSX.writeFile(workbook, fileName);
   };
 
-  const exportToPDF = (collection: CollectionType, data: any[]) => {
-    const doc = new jsPDF();
-    const formattedData = formatDataForExport(collection, data);
-    const collectionLabel = collections.find((c) => c.value === collection)?.label || collection;
+  const loadImage = (url: string): Promise<HTMLImageElement> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+      img.src = url;
+    });
+  };
 
+  const exportToPDF = async (collection: CollectionType, data: any[]) => {
+    const doc = new jsPDF();
+    const collectionLabel = collections.find((c) => c.value === collection)?.label || collection;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 14;
+    const imageSize = 30;
+    const maxTextWidth = pageWidth - margin * 2 - imageSize - 10;
+    
+    // Header
     doc.setFontSize(18);
-    doc.text(`Exportação: ${collectionLabel}`, 14, 20);
+    doc.text(`Exportação: ${collectionLabel}`, margin, 20);
     
     doc.setFontSize(10);
-    doc.text(`Data: ${new Date().toLocaleDateString("pt-BR")}`, 14, 28);
+    doc.text(`Data: ${new Date().toLocaleDateString("pt-BR")}`, margin, 28);
+    
+    let yPosition = 40;
 
-    if (formattedData.length > 0) {
-      const headers = Object.keys(formattedData[0]);
-      const rows = formattedData.map((item) => headers.map((header) => item[header]));
+    for (let i = 0; i < data.length; i++) {
+      const item = data[i];
+      
+      // Check if we need a new page
+      if (yPosition > pageHeight - 50) {
+        doc.addPage();
+        yPosition = margin;
+      }
 
-      autoTable(doc, {
-        head: [headers],
-        body: rows,
-        startY: 35,
-        styles: { fontSize: 8 },
-        headStyles: { fillColor: [59, 130, 246] },
-      });
+      // Draw a border around each item
+      doc.setDrawColor(200, 200, 200);
+      doc.rect(margin, yPosition, pageWidth - margin * 2, imageSize + 5);
+
+      // Try to load and add image
+      if (item.image_url) {
+        try {
+          const img = await loadImage(item.image_url);
+          const canvas = document.createElement('canvas');
+          canvas.width = imageSize * 3;
+          canvas.height = imageSize * 3;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            const imgData = canvas.toDataURL('image/jpeg', 0.7);
+            doc.addImage(imgData, 'JPEG', margin + 2, yPosition + 2.5, imageSize, imageSize);
+          }
+        } catch (error) {
+          // If image fails to load, show placeholder
+          doc.setFillColor(240, 240, 240);
+          doc.rect(margin + 2, yPosition + 2.5, imageSize, imageSize, 'F');
+          doc.setFontSize(8);
+          doc.text('Sem imagem', margin + imageSize / 2, yPosition + imageSize / 2, { align: 'center' });
+        }
+      } else {
+        // No image - show placeholder
+        doc.setFillColor(240, 240, 240);
+        doc.rect(margin + 2, yPosition + 2.5, imageSize, imageSize, 'F');
+        doc.setFontSize(8);
+        doc.text('Sem imagem', margin + imageSize / 2, yPosition + imageSize / 2, { align: 'center' });
+      }
+
+      // Add text data on the right side
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'bold');
+      
+      let textY = yPosition + 8;
+      const lineHeight = 6;
+
+      switch (collection) {
+        case "books":
+          doc.text(`${item.title}`, margin + imageSize + 8, textY, { maxWidth: maxTextWidth });
+          textY += lineHeight;
+          doc.setFont(undefined, 'normal');
+          doc.setFontSize(9);
+          doc.text(`Autor: ${item.author}`, margin + imageSize + 8, textY, { maxWidth: maxTextWidth });
+          textY += lineHeight;
+          doc.text(`Criado em: ${new Date(item.created_at).toLocaleDateString("pt-BR")}`, margin + imageSize + 8, textY);
+          break;
+        
+        case "records":
+          doc.text(`${item.artist} - ${item.album}`, margin + imageSize + 8, textY, { maxWidth: maxTextWidth });
+          textY += lineHeight;
+          doc.setFont(undefined, 'normal');
+          doc.setFontSize(9);
+          doc.text(`Formato: ${item.format} | ${item.is_new ? 'Novo' : 'Usado'}`, margin + imageSize + 8, textY);
+          textY += lineHeight;
+          doc.text(`Criado em: ${new Date(item.created_at).toLocaleDateString("pt-BR")}`, margin + imageSize + 8, textY);
+          break;
+        
+        case "drinks":
+          doc.text(`${item.name}`, margin + imageSize + 8, textY, { maxWidth: maxTextWidth });
+          textY += lineHeight;
+          doc.setFont(undefined, 'normal');
+          doc.setFontSize(9);
+          if (item.manufacturing_location) {
+            doc.text(`Local: ${item.manufacturing_location}`, margin + imageSize + 8, textY, { maxWidth: maxTextWidth });
+            textY += lineHeight;
+          }
+          if (item.grape_type) {
+            doc.text(`Uva: ${item.grape_type}`, margin + imageSize + 8, textY);
+            textY += lineHeight;
+          }
+          const status = [];
+          if (item.needs_to_buy) status.push('Precisa Comprar');
+          if (item.is_finished) status.push('Acabou');
+          if (status.length > 0) {
+            doc.text(`Status: ${status.join(', ')}`, margin + imageSize + 8, textY);
+          }
+          break;
+        
+        case "board_games":
+          doc.text(`${item.name}`, margin + imageSize + 8, textY, { maxWidth: maxTextWidth });
+          textY += lineHeight;
+          doc.setFont(undefined, 'normal');
+          doc.setFontSize(9);
+          doc.text(`Criado em: ${new Date(item.created_at).toLocaleDateString("pt-BR")}`, margin + imageSize + 8, textY);
+          break;
+      }
+
+      yPosition += imageSize + 10;
     }
 
     const fileName = `${collectionLabel}_${new Date().toLocaleDateString("pt-BR").replace(/\//g, "-")}.pdf`;
@@ -148,7 +254,7 @@ export default function Exportacao() {
       if (selectedFormat === "excel") {
         exportToExcel(selectedCollection, data);
       } else {
-        exportToPDF(selectedCollection, data);
+        await exportToPDF(selectedCollection, data);
       }
 
       toast({
