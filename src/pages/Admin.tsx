@@ -38,8 +38,8 @@ export default function Admin() {
               <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="overview">Visão Geral</TabsTrigger>
                 <TabsTrigger value="users">Usuários</TabsTrigger>
-                <TabsTrigger value="categories">Categorias</TabsTrigger>
-                <TabsTrigger value="drinks">Bebidas</TabsTrigger>
+                <TabsTrigger value="categories">Categorias de Livros</TabsTrigger>
+                <TabsTrigger value="drinks">Tipos de Bebida</TabsTrigger>
               </TabsList>
               
               <TabsContent value="overview" className="space-y-4">
