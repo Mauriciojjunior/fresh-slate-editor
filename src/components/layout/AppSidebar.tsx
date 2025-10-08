@@ -1,4 +1,4 @@
-import { Home, Book, Disc3, Wine, Gamepad2, Settings, BarChart3 } from "lucide-react";
+import { Home, Book, Disc3, Wine, Gamepad2, Settings, BarChart3, Download } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
   Sidebar,
@@ -20,6 +20,7 @@ const mainItems = [
   { title: "Bebidas", url: "/bebidas", icon: Wine },
   { title: "Jogos", url: "/jogos", icon: Gamepad2 },
   { title: "Relatórios", url: "/relatorios", icon: BarChart3 },
+  { title: "Exportação", url: "/exportacao", icon: Download },
 ];
 
 const adminItems = [
