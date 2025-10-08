@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { RoleGuard } from "@/components/auth/RoleGuard";
 import { Search, Edit, Trash2, Plus, Gamepad2 } from "lucide-react";
 import { BoardGameForm } from "./BoardGameForm";
+import { ItemDetailModal } from "@/components/shared/ItemDetailModal";
 
 interface BoardGame {
   id: string;
@@ -20,6 +21,7 @@ export function BoardGameList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [editingGame, setEditingGame] = useState<BoardGame | null>(null);
+  const [selectedGame, setSelectedGame] = useState<BoardGame | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -146,7 +148,7 @@ export function BoardGameList() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filteredGames.map((game) => (
-            <Card key={game.id} className="overflow-hidden">
+            <Card key={game.id} className="overflow-hidden cursor-pointer hover-scale" onClick={() => setSelectedGame(game)}>
               {game.image_url ? (
                 <img
                   src={game.image_url}
@@ -161,7 +163,7 @@ export function BoardGameList() {
               <CardContent className="p-4">
                 <h3 className="font-semibold text-lg mb-3 line-clamp-2">{game.name}</h3>
                 <RoleGuard requireWrite>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
                     <Button
                       variant="outline"
                       size="sm"
@@ -185,6 +187,19 @@ export function BoardGameList() {
             </Card>
           ))}
         </div>
+      )}
+
+      {selectedGame && (
+        <ItemDetailModal
+          open={!!selectedGame}
+          onOpenChange={(open) => !open && setSelectedGame(null)}
+          title={selectedGame.name}
+          imageUrl={selectedGame.image_url}
+          imagePlaceholder={<Gamepad2 className="h-24 w-24 text-muted-foreground" />}
+          fields={[
+            { label: "Nome", value: selectedGame.name },
+          ]}
+        />
       )}
     </div>
   );

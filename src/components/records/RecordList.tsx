@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { RoleGuard } from "@/components/auth/RoleGuard";
 import { Edit, Trash2, Plus, Disc3 } from "lucide-react";
 import { RecordForm } from "./RecordForm";
+import { ItemDetailModal } from "@/components/shared/ItemDetailModal";
 
 interface Record {
   id: string;
@@ -24,6 +25,7 @@ export function RecordList() {
   const [formatFilter, setFormatFilter] = useState<string>("all");
   const [showForm, setShowForm] = useState(false);
   const [editingRecord, setEditingRecord] = useState<Record | null>(null);
+  const [selectedRecord, setSelectedRecord] = useState<Record | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -168,7 +170,7 @@ export function RecordList() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {records.map((record) => (
-            <Card key={record.id} className="overflow-hidden">
+            <Card key={record.id} className="overflow-hidden cursor-pointer hover-scale" onClick={() => setSelectedRecord(record)}>
               {record.image_url ? (
                 <img
                   src={record.image_url}
@@ -192,7 +194,7 @@ export function RecordList() {
                   </Badge>
                 </div>
                 <RoleGuard requireWrite>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
                     <Button
                       variant="outline"
                       size="sm"
@@ -216,6 +218,32 @@ export function RecordList() {
             </Card>
           ))}
         </div>
+      )}
+
+      {selectedRecord && (
+        <ItemDetailModal
+          open={!!selectedRecord}
+          onOpenChange={(open) => !open && setSelectedRecord(null)}
+          title={selectedRecord.album}
+          imageUrl={selectedRecord.image_url}
+          imagePlaceholder={<Disc3 className="h-24 w-24 text-muted-foreground" />}
+          fields={[
+            { label: "Álbum", value: selectedRecord.album },
+            { label: "Artista", value: selectedRecord.artist },
+            { 
+              label: "Formato", 
+              value: <Badge variant={selectedRecord.format === 'vinil' ? 'default' : 'secondary'}>
+                {selectedRecord.format.toUpperCase()}
+              </Badge>
+            },
+            { 
+              label: "Condição", 
+              value: <Badge variant={selectedRecord.is_new ? 'default' : 'outline'}>
+                {selectedRecord.is_new ? 'Novo' : 'Usado'}
+              </Badge>
+            },
+          ]}
+        />
       )}
     </div>
   );

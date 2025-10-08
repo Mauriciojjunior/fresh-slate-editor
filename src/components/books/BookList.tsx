@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { RoleGuard } from "@/components/auth/RoleGuard";
 import { Search, Edit, Trash2, Plus, Book } from "lucide-react";
 import { BookForm } from "./BookForm";
+import { ItemDetailModal } from "@/components/shared/ItemDetailModal";
 
 interface Book {
   id: string;
@@ -26,6 +27,7 @@ export function BookList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [editingBook, setEditingBook] = useState<Book | null>(null);
+  const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -165,7 +167,7 @@ export function BookList() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredBooks.map((book) => (
-            <Card key={book.id} className="overflow-hidden">
+            <Card key={book.id} className="overflow-hidden cursor-pointer hover-scale" onClick={() => setSelectedBook(book)}>
               {book.image_url ? (
                 <img
                   src={book.image_url}
@@ -184,7 +186,7 @@ export function BookList() {
                   {book.book_categories.name}
                 </Badge>
                 <RoleGuard requireWrite>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
                     <Button
                       variant="outline"
                       size="sm"
@@ -208,6 +210,21 @@ export function BookList() {
             </Card>
           ))}
         </div>
+      )}
+
+      {selectedBook && (
+        <ItemDetailModal
+          open={!!selectedBook}
+          onOpenChange={(open) => !open && setSelectedBook(null)}
+          title={selectedBook.title}
+          imageUrl={selectedBook.image_url}
+          imagePlaceholder={<Book className="h-24 w-24 text-muted-foreground" />}
+          fields={[
+            { label: "Título", value: selectedBook.title },
+            { label: "Autor", value: selectedBook.author },
+            { label: "Categoria", value: <Badge variant="secondary">{selectedBook.book_categories.name}</Badge> },
+          ]}
+        />
       )}
     </div>
   );

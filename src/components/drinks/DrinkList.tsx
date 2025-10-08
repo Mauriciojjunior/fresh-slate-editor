@@ -11,6 +11,7 @@ import { Search, Edit, Trash2, Plus, Wine, Clock } from "lucide-react";
 import { DrinkForm } from "./DrinkForm";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { ItemDetailModal } from "@/components/shared/ItemDetailModal";
 
 interface Drink {
   id: string;
@@ -36,6 +37,7 @@ export function DrinkList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [editingDrink, setEditingDrink] = useState<Drink | null>(null);
+  const [selectedDrink, setSelectedDrink] = useState<Drink | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -214,7 +216,7 @@ export function DrinkList() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredDrinks.map((drink) => (
-            <Card key={drink.id} className="overflow-hidden">
+            <Card key={drink.id} className="overflow-hidden cursor-pointer hover-scale" onClick={() => setSelectedDrink(drink)}>
               {drink.image_url ? (
                 <img
                   src={drink.image_url}
@@ -243,7 +245,7 @@ export function DrinkList() {
                   {getStatusBadge(drink)}
                 </div>
                 <RoleGuard requireWrite>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
                     <Button
                       variant="outline"
                       size="sm"
@@ -267,6 +269,26 @@ export function DrinkList() {
             </Card>
           ))}
         </div>
+      )}
+
+      {selectedDrink && (
+        <ItemDetailModal
+          open={!!selectedDrink}
+          onOpenChange={(open) => !open && setSelectedDrink(null)}
+          title={selectedDrink.name}
+          imageUrl={selectedDrink.image_url}
+          imagePlaceholder={<Wine className="h-24 w-24 text-muted-foreground" />}
+          fields={[
+            { label: "Nome", value: selectedDrink.name },
+            { label: "Tipo", value: <Badge variant="secondary">{selectedDrink.drink_types.name}</Badge> },
+            ...(selectedDrink.manufacturing_location ? [{ label: "Local de Fabricação", value: selectedDrink.manufacturing_location }] : []),
+            ...(selectedDrink.grape_type ? [{ label: "Tipo de Uva", value: selectedDrink.grape_type }] : []),
+            { 
+              label: "Status", 
+              value: getStatusBadge(selectedDrink)
+            },
+          ]}
+        />
       )}
     </div>
   );
