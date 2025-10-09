@@ -15,6 +15,11 @@ interface DrinkType {
   name: string;
 }
 
+interface GrapeType {
+  id: string;
+  name: string;
+}
+
 interface Drink {
   id: string;
   name: string;
@@ -38,6 +43,7 @@ interface DrinkFormProps {
 
 export function DrinkForm({ drink, onSuccess, onCancel }: DrinkFormProps) {
   const [drinkTypes, setDrinkTypes] = useState<DrinkType[]>([]);
+  const [grapeTypes, setGrapeTypes] = useState<GrapeType[]>([]);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: drink?.name || "",
@@ -52,6 +58,7 @@ export function DrinkForm({ drink, onSuccess, onCancel }: DrinkFormProps) {
 
   useEffect(() => {
     fetchDrinkTypes();
+    fetchGrapeTypes();
   }, []);
 
   const fetchDrinkTypes = async () => {
@@ -68,6 +75,25 @@ export function DrinkForm({ drink, onSuccess, onCancel }: DrinkFormProps) {
       toast({
         title: "Erro",
         description: "Não foi possível carregar os tipos de bebida.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const fetchGrapeTypes = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('grape_types')
+        .select('id, name')
+        .order('name');
+
+      if (error) throw error;
+      setGrapeTypes(data || []);
+    } catch (error: any) {
+      console.error('Error fetching grape types:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar os tipos de uva.",
         variant: "destructive",
       });
     }
@@ -227,12 +253,21 @@ export function DrinkForm({ drink, onSuccess, onCancel }: DrinkFormProps) {
             {isWineType && (
               <div className="grid gap-2">
                 <Label htmlFor="grape_type">Tipo de Uva</Label>
-                <Input
-                  id="grape_type"
-                  placeholder="Tipo da uva (ex: Cabernet Sauvignon)"
-                  value={formData.grape_type}
-                  onChange={(e) => setFormData({ ...formData, grape_type: e.target.value })}
-                />
+                <Select 
+                  value={formData.grape_type} 
+                  onValueChange={(value) => setFormData({ ...formData, grape_type: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o tipo de uva" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {grapeTypes.map((type) => (
+                      <SelectItem key={type.id} value={type.name}>
+                        {type.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             )}
 

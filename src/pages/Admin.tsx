@@ -7,10 +7,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useUserRole } from "@/hooks/useUserRole";
-import { Settings, Users, Shield, Database, BarChart3, Book, Wine } from "lucide-react";
+import { Settings, Users, Shield, Database, BarChart3, Book, Wine, Grape } from "lucide-react";
 import { UserManagement } from "@/components/admin/UserManagement";
 import { BookCategoryManager } from "@/components/admin/BookCategoryManager";
 import { DrinkTypeManager } from "@/components/admin/DrinkTypeManager";
+import { GrapeTypeManager } from "@/components/admin/GrapeTypeManager";
 
 export default function Admin() {
   const { role } = useUserRole();
@@ -35,11 +36,12 @@ export default function Admin() {
             </div>
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-5">
                 <TabsTrigger value="overview">Visão Geral</TabsTrigger>
                 <TabsTrigger value="users">Usuários</TabsTrigger>
                 <TabsTrigger value="categories">Categorias de Livros</TabsTrigger>
                 <TabsTrigger value="drinks">Tipos de Bebida</TabsTrigger>
+                <TabsTrigger value="grapes">Tipos de Uva</TabsTrigger>
               </TabsList>
               
               <TabsContent value="overview" className="space-y-4">
@@ -151,6 +153,10 @@ export default function Admin() {
               
               <TabsContent value="drinks">
                 <DrinkTypeManager />
+              </TabsContent>
+              
+              <TabsContent value="grapes">
+                <GrapeTypeManager />
               </TabsContent>
             </Tabs>
           </div>
