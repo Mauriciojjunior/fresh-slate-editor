@@ -150,13 +150,15 @@ export function BoardGameList() {
           {filteredGames.map((game) => (
             <Card key={game.id} className="overflow-hidden cursor-pointer hover-scale" onClick={() => setSelectedGame(game)}>
               {game.image_url ? (
-                <img
-                  src={game.image_url}
-                  alt={game.name}
-                  className="aspect-square w-full object-cover"
-                />
+                <div className="h-[220px] flex items-center justify-center bg-muted">
+                  <img
+                    src={game.image_url}
+                    alt={game.name}
+                    className="collection-thumbnail"
+                  />
+                </div>
               ) : (
-                <div className="aspect-square bg-muted flex items-center justify-center">
+                <div className="h-[220px] bg-muted flex items-center justify-center">
                   <Gamepad2 className="h-12 w-12 text-muted-foreground" />
                 </div>
               )}

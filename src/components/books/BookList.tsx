@@ -169,13 +169,15 @@ export function BookList() {
           {filteredBooks.map((book) => (
             <Card key={book.id} className="overflow-hidden cursor-pointer hover-scale" onClick={() => setSelectedBook(book)}>
               {book.image_url ? (
-                <img
-                  src={book.image_url}
-                  alt={book.title}
-                  className="h-48 w-full object-cover"
-                />
+                <div className="h-[220px] flex items-center justify-center bg-muted">
+                  <img
+                    src={book.image_url}
+                    alt={book.title}
+                    className="collection-thumbnail"
+                  />
+                </div>
               ) : (
-                <div className="h-48 bg-muted flex items-center justify-center">
+                <div className="h-[220px] bg-muted flex items-center justify-center">
                   <Book className="h-12 w-12 text-muted-foreground" />
                 </div>
               )}

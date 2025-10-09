@@ -108,4 +108,14 @@ All colors MUST be HSL.
   .hover-scale {
     @apply transition-transform duration-200 hover:scale-105;
   }
+
+  .collection-thumbnail {
+    object-fit: contain;
+    object-position: center;
+    background-color: hsl(var(--muted));
+    border-radius: 8px;
+    max-height: 220px;
+    width: 100%;
+    display: block;
+  }
 }

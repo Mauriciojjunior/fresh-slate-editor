@@ -172,13 +172,15 @@ export function RecordList() {
           {records.map((record) => (
             <Card key={record.id} className="overflow-hidden cursor-pointer hover-scale" onClick={() => setSelectedRecord(record)}>
               {record.image_url ? (
-                <img
-                  src={record.image_url}
-                  alt={record.album}
-                  className="h-48 w-full object-cover"
-                />
+                <div className="h-[220px] flex items-center justify-center bg-muted">
+                  <img
+                    src={record.image_url}
+                    alt={record.album}
+                    className="collection-thumbnail"
+                  />
+                </div>
               ) : (
-                <div className="h-48 bg-muted flex items-center justify-center">
+                <div className="h-[220px] bg-muted flex items-center justify-center">
                   <Disc3 className="h-12 w-12 text-muted-foreground" />
                 </div>
               )}
