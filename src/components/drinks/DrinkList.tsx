@@ -187,13 +187,13 @@ export function DrinkList() {
       </div>
 
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {[...Array(6)].map((_, i) => (
-            <Card key={i} className="animate-pulse">
-              <div className="h-48 bg-muted rounded-t-lg"></div>
-              <CardContent className="p-4">
-                <div className="h-4 bg-muted rounded mb-2"></div>
-                <div className="h-3 bg-muted rounded mb-1"></div>
+        <div className="collection-grid">
+          {[...Array(8)].map((_, i) => (
+            <Card key={i} className="animate-pulse collection-card">
+              <div className="h-[220px] bg-muted"></div>
+              <CardContent className="collection-card-content">
+                <div className="h-4 bg-muted rounded"></div>
+                <div className="h-3 bg-muted rounded"></div>
                 <div className="h-3 bg-muted rounded w-2/3"></div>
               </CardContent>
             </Card>
@@ -214,9 +214,9 @@ export function DrinkList() {
           </RoleGuard>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="collection-grid">
           {filteredDrinks.map((drink) => (
-            <Card key={drink.id} className="overflow-hidden cursor-pointer hover-scale" onClick={() => setSelectedDrink(drink)}>
+            <Card key={drink.id} className="collection-card" onClick={() => setSelectedDrink(drink)}>
               {drink.image_url ? (
                 <div className="h-[220px] flex items-center justify-center bg-muted">
                   <img
@@ -230,20 +230,20 @@ export function DrinkList() {
                   <Wine className="h-12 w-12 text-muted-foreground" />
                 </div>
               )}
-              <CardContent className="p-4">
-                <h3 className="font-semibold text-lg mb-1">{drink.name}</h3>
-                <p className="text-muted-foreground mb-1">{drink.drink_types.name}</p>
+              <CardContent className="collection-card-content">
+                <h3 className="font-semibold text-lg line-clamp-2">{drink.name}</h3>
+                <p className="text-muted-foreground text-sm">{drink.drink_types.name}</p>
                 {drink.manufacturing_location && (
-                  <p className="text-sm text-muted-foreground mb-1">
+                  <p className="text-sm text-muted-foreground">
                     Local: {drink.manufacturing_location}
                   </p>
                 )}
                 {drink.grape_type && (
-                  <p className="text-sm text-muted-foreground mb-2">
+                  <p className="text-sm text-muted-foreground">
                     Uva: {drink.grape_type}
                   </p>
                 )}
-                <div className="mb-3">
+                <div>
                   {getStatusBadge(drink)}
                 </div>
                 <RoleGuard requireWrite>

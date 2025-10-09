@@ -138,13 +138,13 @@ export function BookList() {
       </div>
 
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {[...Array(6)].map((_, i) => (
-            <Card key={i} className="animate-pulse">
-              <div className="h-48 bg-muted rounded-t-lg"></div>
-              <CardContent className="p-4">
-                <div className="h-4 bg-muted rounded mb-2"></div>
-                <div className="h-3 bg-muted rounded mb-1"></div>
+        <div className="collection-grid">
+          {[...Array(8)].map((_, i) => (
+            <Card key={i} className="animate-pulse collection-card">
+              <div className="h-[220px] bg-muted"></div>
+              <CardContent className="collection-card-content">
+                <div className="h-4 bg-muted rounded"></div>
+                <div className="h-3 bg-muted rounded"></div>
                 <div className="h-3 bg-muted rounded w-2/3"></div>
               </CardContent>
             </Card>
@@ -165,9 +165,9 @@ export function BookList() {
           </RoleGuard>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="collection-grid">
           {filteredBooks.map((book) => (
-            <Card key={book.id} className="overflow-hidden cursor-pointer hover-scale" onClick={() => setSelectedBook(book)}>
+            <Card key={book.id} className="collection-card" onClick={() => setSelectedBook(book)}>
               {book.image_url ? (
                 <div className="h-[220px] flex items-center justify-center bg-muted">
                   <img
@@ -181,10 +181,10 @@ export function BookList() {
                   <Book className="h-12 w-12 text-muted-foreground" />
                 </div>
               )}
-              <CardContent className="p-4">
-                <h3 className="font-semibold text-lg mb-1">{book.title}</h3>
-                <p className="text-muted-foreground mb-2">{book.author}</p>
-                <Badge variant="secondary" className="mb-3">
+              <CardContent className="collection-card-content">
+                <h3 className="font-semibold text-lg line-clamp-2">{book.title}</h3>
+                <p className="text-muted-foreground text-sm">{book.author}</p>
+                <Badge variant="secondary">
                   {book.book_categories.name}
                 </Badge>
                 <RoleGuard requireWrite>

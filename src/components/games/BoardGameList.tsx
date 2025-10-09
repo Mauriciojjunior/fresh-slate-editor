@@ -121,12 +121,12 @@ export function BoardGameList() {
       </div>
 
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="collection-grid">
           {[...Array(8)].map((_, i) => (
-            <Card key={i} className="animate-pulse">
-              <div className="aspect-square bg-muted rounded-t-lg"></div>
-              <CardContent className="p-4">
-                <div className="h-4 bg-muted rounded mb-2"></div>
+            <Card key={i} className="animate-pulse collection-card">
+              <div className="h-[220px] bg-muted"></div>
+              <CardContent className="collection-card-content">
+                <div className="h-4 bg-muted rounded"></div>
               </CardContent>
             </Card>
           ))}
@@ -146,9 +146,9 @@ export function BoardGameList() {
           </RoleGuard>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="collection-grid">
           {filteredGames.map((game) => (
-            <Card key={game.id} className="overflow-hidden cursor-pointer hover-scale" onClick={() => setSelectedGame(game)}>
+            <Card key={game.id} className="collection-card" onClick={() => setSelectedGame(game)}>
               {game.image_url ? (
                 <div className="h-[220px] flex items-center justify-center bg-muted">
                   <img
@@ -162,8 +162,8 @@ export function BoardGameList() {
                   <Gamepad2 className="h-12 w-12 text-muted-foreground" />
                 </div>
               )}
-              <CardContent className="p-4">
-                <h3 className="font-semibold text-lg mb-3 line-clamp-2">{game.name}</h3>
+              <CardContent className="collection-card-content">
+                <h3 className="font-semibold text-lg line-clamp-2">{game.name}</h3>
                 <RoleGuard requireWrite>
                   <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
                     <Button

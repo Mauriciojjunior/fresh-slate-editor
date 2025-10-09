@@ -118,4 +118,18 @@ All colors MUST be HSL.
     width: 100%;
     display: block;
   }
+
+  .collection-card {
+    @apply overflow-hidden cursor-pointer hover-scale;
+    min-height: 380px;
+  }
+
+  .collection-card-content {
+    @apply p-4 flex flex-col gap-2;
+    min-height: 160px;
+  }
+
+  .collection-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4;
+  }
 }
