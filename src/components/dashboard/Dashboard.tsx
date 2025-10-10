@@ -6,8 +6,12 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Book, Disc3, Wine, Gamepad2, ArrowRight, TrendingUp, BarChart3, ShoppingCart, Clock } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow, format, subMonths, startOfMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { DashboardEvolutionChart } from "./DashboardEvolutionChart";
+import { RecentItemsCard } from "./RecentItemsCard";
+import { DetailedStatsModal } from "./DetailedStatsModal";
+import { QuickAddButton } from "./QuickAddButton";
 
 interface CollectionCounts {
   books: number;
@@ -25,6 +29,19 @@ interface DrinkToBuy {
   };
 }
 
+interface RecentItem {
+  id: string;
+  name: string;
+  category: string;
+  image_url: string | null;
+  created_at: string;
+}
+
+interface MonthlyData {
+  month: string;
+  total: number;
+}
+
 export function Dashboard() {
   const [counts, setCounts] = useState<CollectionCounts>({
     books: 0,
@@ -33,12 +50,17 @@ export function Dashboard() {
     boardGames: 0,
   });
   const [drinksToBuy, setDrinksToBuy] = useState<DrinkToBuy[]>([]);
+  const [recentItems, setRecentItems] = useState<RecentItem[]>([]);
+  const [monthlyData, setMonthlyData] = useState<MonthlyData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [statsModalOpen, setStatsModalOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
     fetchCounts();
     fetchDrinksToBuy();
+    fetchRecentItems();
+    fetchMonthlyEvolution();
   }, []);
 
   const fetchCounts = async () => {
@@ -92,6 +114,61 @@ export function Dashboard() {
     }
   };
 
+  const fetchRecentItems = async () => {
+    try {
+      const [books, records, drinks, games] = await Promise.all([
+        supabase.from('books').select('id, title, image_url, created_at').order('created_at', { ascending: false }).limit(2),
+        supabase.from('records').select('id, album, image_url, created_at').order('created_at', { ascending: false }).limit(2),
+        supabase.from('drinks').select('id, name, image_url, created_at').order('created_at', { ascending: false }).limit(2),
+        supabase.from('board_games').select('id, name, image_url, created_at').order('created_at', { ascending: false }).limit(2),
+      ]);
+
+      const allItems: RecentItem[] = [
+        ...(books.data || []).map(item => ({ ...item, name: item.title, category: 'Livros' })),
+        ...(records.data || []).map(item => ({ ...item, name: item.album, category: 'Discos' })),
+        ...(drinks.data || []).map(item => ({ ...item, category: 'Bebidas' })),
+        ...(games.data || []).map(item => ({ ...item, category: 'Jogos' })),
+      ];
+
+      allItems.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+      setRecentItems(allItems.slice(0, 5));
+    } catch (error: any) {
+      console.error('Error fetching recent items:', error);
+    }
+  };
+
+  const fetchMonthlyEvolution = async () => {
+    try {
+      const months = [];
+      for (let i = 5; i >= 0; i--) {
+        const date = subMonths(new Date(), i);
+        const monthStart = startOfMonth(date);
+        months.push({
+          date: monthStart,
+          label: format(date, 'MMM', { locale: ptBR }),
+        });
+      }
+
+      const monthlyTotals = await Promise.all(
+        months.map(async ({ date, label }) => {
+          const [books, records, drinks, games] = await Promise.all([
+            supabase.from('books').select('id', { count: 'exact', head: true }).lte('created_at', date.toISOString()),
+            supabase.from('records').select('id', { count: 'exact', head: true }).lte('created_at', date.toISOString()),
+            supabase.from('drinks').select('id', { count: 'exact', head: true }).lte('created_at', date.toISOString()),
+            supabase.from('board_games').select('id', { count: 'exact', head: true }).lte('created_at', date.toISOString()),
+          ]);
+
+          const total = (books.count || 0) + (records.count || 0) + (drinks.count || 0) + (games.count || 0);
+          return { month: label, total };
+        })
+      );
+
+      setMonthlyData(monthlyTotals);
+    } catch (error: any) {
+      console.error('Error fetching monthly evolution:', error);
+    }
+  };
+
   const collections = [
     {
       title: "Livros",
@@ -134,7 +211,7 @@ export function Dashboard() {
   const totalItems = counts.books + counts.records + counts.drinks + counts.boardGames;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 pb-20">
       {/* Header */}
       <div className="text-center space-y-4">
         <h1 className="text-4xl font-bold text-foreground">
@@ -147,12 +224,15 @@ export function Dashboard() {
 
       {/* Stats Overview */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="lg:col-span-2 bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
+        <Card 
+          className="lg:col-span-2 bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20 cursor-pointer hover:shadow-lg transition-all"
+          onClick={() => setStatsModalOpen(true)}
+        >
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-2xl font-bold text-primary">Total de Itens</h3>
-                <p className="text-muted-foreground">Across all collections</p>
+                <p className="text-muted-foreground">Clique para ver detalhes</p>
               </div>
               <div className="text-right">
                 <div className="text-4xl font-bold text-primary">{totalItems}</div>
@@ -224,7 +304,17 @@ export function Dashboard() {
             </CardContent>
           </Card>
         )}
+
+        {/* Recent Items Card */}
+        <RecentItemsCard items={recentItems} />
       </div>
+
+      {/* Evolution Chart */}
+      {totalItems > 0 && monthlyData.length > 0 && (
+        <div className="grid grid-cols-1 gap-6">
+          <DashboardEvolutionChart data={monthlyData} />
+        </div>
+      )}
 
       {/* Collection Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -310,6 +400,17 @@ export function Dashboard() {
           </CardContent>
         </Card>
       )}
+
+      {/* Quick Add Button */}
+      <QuickAddButton />
+
+      {/* Detailed Stats Modal */}
+      <DetailedStatsModal 
+        open={statsModalOpen}
+        onOpenChange={setStatsModalOpen}
+        counts={counts}
+        totalItems={totalItems}
+      />
     </div>
   );
 }
