@@ -1,17 +1,18 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { RoleGuard } from "@/components/auth/RoleGuard";
-import { Search, Edit, Trash2, Plus, Wine, Clock } from "lucide-react";
+import { Edit, Trash2, Plus, Wine, Clock } from "lucide-react";
 import { DrinkForm } from "./DrinkForm";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { ItemDetailModal } from "@/components/shared/ItemDetailModal";
+import { CollectionFilters, SortOption, ViewMode } from "@/components/shared/CollectionFilters";
+import { EmptyState } from "@/components/shared/EmptyState";
 
 interface Drink {
   id: string;
@@ -22,6 +23,7 @@ interface Drink {
   image_url: string | null;
   needs_to_buy: boolean;
   is_finished: boolean;
+  created_at: string;
   needs_to_buy_marked_at: string | null;
   needs_to_buy_unmarked_at: string | null;
   is_finished_marked_at: string | null;
@@ -33,8 +35,13 @@ interface Drink {
 
 export function DrinkList() {
   const [drinks, setDrinks] = useState<Drink[]>([]);
+  const [drinkTypes, setDrinkTypes] = useState<{ id: string; name: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [typeFilter, setTypeFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [sortBy, setSortBy] = useState<SortOption>("name-asc");
+  const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [showForm, setShowForm] = useState(false);
   const [editingDrink, setEditingDrink] = useState<Drink | null>(null);
   const [selectedDrink, setSelectedDrink] = useState<Drink | null>(null);
@@ -42,7 +49,22 @@ export function DrinkList() {
 
   useEffect(() => {
     fetchDrinks();
+    fetchDrinkTypes();
   }, []);
+
+  const fetchDrinkTypes = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('drink_types')
+        .select('id, name')
+        .order('name');
+
+      if (error) throw error;
+      setDrinkTypes(data || []);
+    } catch (error: any) {
+      console.error('Error fetching drink types:', error);
+    }
+  };
 
   const fetchDrinks = async () => {
     try {
@@ -57,6 +79,7 @@ export function DrinkList() {
           image_url,
           needs_to_buy,
           is_finished,
+          created_at,
           needs_to_buy_marked_at,
           needs_to_buy_unmarked_at,
           is_finished_marked_at,
@@ -64,8 +87,7 @@ export function DrinkList() {
           drink_types (
             name
           )
-        `)
-        .order('name');
+        `);
 
       if (error) throw error;
       setDrinks(data || []);
@@ -107,12 +129,39 @@ export function DrinkList() {
     }
   };
 
-  const filteredDrinks = drinks.filter(drink => 
-    drink.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    drink.drink_types.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (drink.manufacturing_location && drink.manufacturing_location.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (drink.grape_type && drink.grape_type.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  // Apply filters and sorting
+  const filteredAndSortedDrinks = drinks
+    .filter(drink => {
+      const matchesSearch = 
+        drink.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        drink.drink_types.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (drink.manufacturing_location && drink.manufacturing_location.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (drink.grape_type && drink.grape_type.toLowerCase().includes(searchTerm.toLowerCase()));
+      
+      const matchesType = typeFilter === "all" || drink.type_id === typeFilter;
+      
+      const matchesStatus = 
+        statusFilter === "all" ||
+        (statusFilter === "available" && !drink.is_finished && !drink.needs_to_buy) ||
+        (statusFilter === "buy" && drink.needs_to_buy) ||
+        (statusFilter === "finished" && drink.is_finished);
+      
+      return matchesSearch && matchesType && matchesStatus;
+    })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case 'name-asc':
+          return a.name.localeCompare(b.name);
+        case 'name-desc':
+          return b.name.localeCompare(a.name);
+        case 'recent':
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        case 'oldest':
+          return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+        default:
+          return 0;
+      }
+    });
 
   const handleFormSuccess = () => {
     setShowForm(false);
@@ -151,6 +200,17 @@ export function DrinkList() {
     return <Badge variant="default">Disponível</Badge>;
   };
 
+  const activeFiltersCount = 
+    (searchTerm ? 1 : 0) + 
+    (typeFilter !== "all" ? 1 : 0) +
+    (statusFilter !== "all" ? 1 : 0);
+
+  const handleClearFilters = () => {
+    setSearchTerm("");
+    setTypeFilter("all");
+    setStatusFilter("all");
+  };
+
   if (showForm) {
     return (
       <DrinkForm 
@@ -164,6 +224,137 @@ export function DrinkList() {
     );
   }
 
+  const renderGridView = () => (
+    <div className="collection-grid">
+      {filteredAndSortedDrinks.map((drink) => (
+        <Card key={drink.id} className="collection-card" onClick={() => setSelectedDrink(drink)}>
+          {drink.image_url ? (
+            <div className="h-[220px] flex items-center justify-center bg-muted">
+              <img
+                src={drink.image_url}
+                alt={drink.name}
+                className="collection-thumbnail"
+              />
+            </div>
+          ) : (
+            <div className="h-[220px] bg-muted flex items-center justify-center">
+              <Wine className="h-12 w-12 text-muted-foreground" />
+            </div>
+          )}
+          <CardContent className="collection-card-content">
+            <h3 className="font-semibold text-lg line-clamp-2">{drink.name}</h3>
+            <p className="text-muted-foreground text-sm">{drink.drink_types.name}</p>
+            {drink.manufacturing_location && (
+              <p className="text-sm text-muted-foreground line-clamp-1">
+                {drink.manufacturing_location}
+              </p>
+            )}
+            <div>
+              {getStatusBadge(drink)}
+            </div>
+            <RoleGuard requireWrite>
+              <TooltipProvider>
+                <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setEditingDrink(drink);
+                          setShowForm(true);
+                        }}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Editar bebida</TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDelete(drink.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Excluir bebida</TooltipContent>
+                  </Tooltip>
+                </div>
+              </TooltipProvider>
+            </RoleGuard>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+
+  const renderListView = () => (
+    <div className="collection-list">
+      {filteredAndSortedDrinks.map((drink) => (
+        <div 
+          key={drink.id} 
+          className="collection-list-item"
+          onClick={() => setSelectedDrink(drink)}
+        >
+          <div className="collection-list-image">
+            {drink.image_url ? (
+              <img
+                src={drink.image_url}
+                alt={drink.name}
+                className="w-full h-full object-contain"
+              />
+            ) : (
+              <Wine className="h-8 w-8 text-muted-foreground" />
+            )}
+          </div>
+          <div className="collection-list-content">
+            <h3 className="font-semibold text-base line-clamp-1">{drink.name}</h3>
+            <p className="text-sm text-muted-foreground">{drink.drink_types.name}</p>
+            <div className="flex items-center gap-2">
+              {getStatusBadge(drink)}
+            </div>
+          </div>
+          <RoleGuard requireWrite>
+            <TooltipProvider>
+              <div className="collection-list-actions" onClick={(e) => e.stopPropagation()}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setEditingDrink(drink);
+                        setShowForm(true);
+                      }}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Editar bebida</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDelete(drink.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Excluir bebida</TooltipContent>
+                </Tooltip>
+              </div>
+            </TooltipProvider>
+          </RoleGuard>
+        </div>
+      ))}
+    </div>
+  );
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -176,15 +367,39 @@ export function DrinkList() {
         </RoleGuard>
       </div>
 
-      <div className="flex items-center space-x-2">
-        <Search className="h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Buscar por nome, tipo, local ou uva..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="max-w-sm"
-        />
-      </div>
+      <CollectionFilters
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        sortBy={sortBy}
+        onSortChange={setSortBy}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        filters={[
+          {
+            label: "Tipo",
+            value: typeFilter,
+            options: [
+              { label: "Todos", value: "all" },
+              ...drinkTypes.map(type => ({ label: type.name, value: type.id }))
+            ],
+            onChange: setTypeFilter
+          },
+          {
+            label: "Status",
+            value: statusFilter,
+            options: [
+              { label: "Todos", value: "all" },
+              { label: "Disponível", value: "available" },
+              { label: "Comprar", value: "buy" },
+              { label: "Acabou", value: "finished" }
+            ],
+            onChange: setStatusFilter
+          }
+        ]}
+        activeFiltersCount={activeFiltersCount}
+        onClearFilters={handleClearFilters}
+        searchPlaceholder="Buscar por nome, tipo, local ou uva..."
+      />
 
       {loading ? (
         <div className="collection-grid">
@@ -199,78 +414,21 @@ export function DrinkList() {
             </Card>
           ))}
         </div>
-      ) : filteredDrinks.length === 0 ? (
-        <div className="text-center py-12">
-          <Wine className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-lg font-medium mb-2">Nenhuma bebida encontrada</h3>
-          <p className="text-muted-foreground mb-4">
-            {searchTerm ? "Tente ajustar sua busca" : "Comece adicionando sua primeira bebida"}
-          </p>
-          <RoleGuard requireWrite>
-            <Button onClick={() => setShowForm(true)}>
-              <Plus className="mr-2 h-4 w-4" />
-              Adicionar Primeira Bebida
-            </Button>
-          </RoleGuard>
-        </div>
+      ) : filteredAndSortedDrinks.length === 0 ? (
+        <EmptyState
+          icon={Wine}
+          title={searchTerm || typeFilter !== "all" || statusFilter !== "all" ? "Nenhuma bebida encontrada" : "Inicie sua adega"}
+          description={
+            searchTerm || typeFilter !== "all" || statusFilter !== "all"
+              ? "Tente ajustar os filtros ou fazer uma nova busca."
+              : "Adicione sua primeira bebida e comece a organizar sua coleção pessoal."
+          }
+          actionLabel="Adicionar Primeira Bebida"
+          onAction={() => setShowForm(true)}
+          showAction={drinks.length === 0}
+        />
       ) : (
-        <div className="collection-grid">
-          {filteredDrinks.map((drink) => (
-            <Card key={drink.id} className="collection-card" onClick={() => setSelectedDrink(drink)}>
-              {drink.image_url ? (
-                <div className="h-[220px] flex items-center justify-center bg-muted">
-                  <img
-                    src={drink.image_url}
-                    alt={drink.name}
-                    className="collection-thumbnail"
-                  />
-                </div>
-              ) : (
-                <div className="h-[220px] bg-muted flex items-center justify-center">
-                  <Wine className="h-12 w-12 text-muted-foreground" />
-                </div>
-              )}
-              <CardContent className="collection-card-content">
-                <h3 className="font-semibold text-lg line-clamp-2">{drink.name}</h3>
-                <p className="text-muted-foreground text-sm">{drink.drink_types.name}</p>
-                {drink.manufacturing_location && (
-                  <p className="text-sm text-muted-foreground">
-                    Local: {drink.manufacturing_location}
-                  </p>
-                )}
-                {drink.grape_type && (
-                  <p className="text-sm text-muted-foreground">
-                    Uva: {drink.grape_type}
-                  </p>
-                )}
-                <div>
-                  {getStatusBadge(drink)}
-                </div>
-                <RoleGuard requireWrite>
-                  <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setEditingDrink(drink);
-                        setShowForm(true);
-                      }}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDelete(drink.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </RoleGuard>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        viewMode === 'grid' ? renderGridView() : renderListView()
       )}
 
       {selectedDrink && (

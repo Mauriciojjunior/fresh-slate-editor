@@ -132,4 +132,24 @@ All colors MUST be HSL.
   .collection-grid {
     @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4;
   }
+
+  .collection-list {
+    @apply flex flex-col gap-3;
+  }
+
+  .collection-list-item {
+    @apply flex items-center gap-4 p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors cursor-pointer;
+  }
+
+  .collection-list-image {
+    @apply w-20 h-20 flex-shrink-0 rounded-md overflow-hidden bg-muted flex items-center justify-center;
+  }
+
+  .collection-list-content {
+    @apply flex-1 min-w-0;
+  }
+
+  .collection-list-actions {
+    @apply flex gap-2 flex-shrink-0;
+  }
 }

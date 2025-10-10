@@ -2,13 +2,15 @@ import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { RoleGuard } from "@/components/auth/RoleGuard";
 import { Edit, Trash2, Plus, Disc3 } from "lucide-react";
 import { RecordForm } from "./RecordForm";
 import { ItemDetailModal } from "@/components/shared/ItemDetailModal";
+import { CollectionFilters, SortOption, ViewMode } from "@/components/shared/CollectionFilters";
+import { EmptyState } from "@/components/shared/EmptyState";
 
 interface Record {
   id: string;
@@ -17,12 +19,17 @@ interface Record {
   format: 'vinil' | 'cd';
   image_url: string | null;
   is_new: boolean;
+  created_at: string;
 }
 
 export function RecordList() {
   const [records, setRecords] = useState<Record[]>([]);
   const [loading, setLoading] = useState(true);
-  const [formatFilter, setFormatFilter] = useState<string>("all");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [formatFilter, setFormatFilter] = useState("all");
+  const [conditionFilter, setConditionFilter] = useState("all");
+  const [sortBy, setSortBy] = useState<SortOption>("name-asc");
+  const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [showForm, setShowForm] = useState(false);
   const [editingRecord, setEditingRecord] = useState<Record | null>(null);
   const [selectedRecord, setSelectedRecord] = useState<Record | null>(null);
@@ -34,16 +41,9 @@ export function RecordList() {
 
   const fetchRecords = async () => {
     try {
-      let query = supabase
+      const { data, error } = await supabase
         .from('records')
-        .select('*')
-        .order('artist');
-
-      if (formatFilter !== "all") {
-        query = query.eq('format', formatFilter);
-      }
-
-      const { data, error } = await query;
+        .select('*');
 
       if (error) throw error;
       setRecords((data || []).map(record => ({
@@ -61,10 +61,6 @@ export function RecordList() {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    fetchRecords();
-  }, [formatFilter]);
 
   const handleDelete = async (id: string) => {
     if (!confirm("Tem certeza que deseja excluir este disco?")) return;
@@ -92,10 +88,52 @@ export function RecordList() {
     }
   };
 
+  // Apply filters and sorting
+  const filteredAndSortedRecords = records
+    .filter(record => {
+      const matchesSearch = 
+        record.album.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        record.artist.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      const matchesFormat = formatFilter === "all" || record.format === formatFilter;
+      
+      const matchesCondition = 
+        conditionFilter === "all" ||
+        (conditionFilter === "new" && record.is_new) ||
+        (conditionFilter === "used" && !record.is_new);
+      
+      return matchesSearch && matchesFormat && matchesCondition;
+    })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case 'name-asc':
+          return a.album.localeCompare(b.album);
+        case 'name-desc':
+          return b.album.localeCompare(a.album);
+        case 'recent':
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        case 'oldest':
+          return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+        default:
+          return 0;
+      }
+    });
+
   const handleFormSuccess = () => {
     setShowForm(false);
     setEditingRecord(null);
     fetchRecords();
+  };
+
+  const activeFiltersCount = 
+    (searchTerm ? 1 : 0) + 
+    (formatFilter !== "all" ? 1 : 0) +
+    (conditionFilter !== "all" ? 1 : 0);
+
+  const handleClearFilters = () => {
+    setSearchTerm("");
+    setFormatFilter("all");
+    setConditionFilter("all");
   };
 
   if (showForm) {
@@ -111,6 +149,142 @@ export function RecordList() {
     );
   }
 
+  const renderGridView = () => (
+    <div className="collection-grid">
+      {filteredAndSortedRecords.map((record) => (
+        <Card key={record.id} className="collection-card" onClick={() => setSelectedRecord(record)}>
+          {record.image_url ? (
+            <div className="h-[220px] flex items-center justify-center bg-muted">
+              <img
+                src={record.image_url}
+                alt={record.album}
+                className="collection-thumbnail"
+              />
+            </div>
+          ) : (
+            <div className="h-[220px] bg-muted flex items-center justify-center">
+              <Disc3 className="h-12 w-12 text-muted-foreground" />
+            </div>
+          )}
+          <CardContent className="collection-card-content">
+            <h3 className="font-semibold text-lg line-clamp-2">{record.album}</h3>
+            <p className="text-muted-foreground text-sm">{record.artist}</p>
+            <div className="flex gap-2 flex-wrap">
+              <Badge variant={record.format === 'vinil' ? 'default' : 'secondary'}>
+                {record.format.toUpperCase()}
+              </Badge>
+              <Badge variant={record.is_new ? 'default' : 'outline'}>
+                {record.is_new ? 'Novo' : 'Usado'}
+              </Badge>
+            </div>
+            <RoleGuard requireWrite>
+              <TooltipProvider>
+                <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setEditingRecord(record);
+                          setShowForm(true);
+                        }}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Editar disco</TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDelete(record.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Excluir disco</TooltipContent>
+                  </Tooltip>
+                </div>
+              </TooltipProvider>
+            </RoleGuard>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+
+  const renderListView = () => (
+    <div className="collection-list">
+      {filteredAndSortedRecords.map((record) => (
+        <div 
+          key={record.id} 
+          className="collection-list-item"
+          onClick={() => setSelectedRecord(record)}
+        >
+          <div className="collection-list-image">
+            {record.image_url ? (
+              <img
+                src={record.image_url}
+                alt={record.album}
+                className="w-full h-full object-contain"
+              />
+            ) : (
+              <Disc3 className="h-8 w-8 text-muted-foreground" />
+            )}
+          </div>
+          <div className="collection-list-content">
+            <h3 className="font-semibold text-base line-clamp-1">{record.album}</h3>
+            <p className="text-sm text-muted-foreground">{record.artist}</p>
+            <div className="flex gap-2 flex-wrap">
+              <Badge variant={record.format === 'vinil' ? 'default' : 'secondary'}>
+                {record.format.toUpperCase()}
+              </Badge>
+              <Badge variant={record.is_new ? 'default' : 'outline'}>
+                {record.is_new ? 'Novo' : 'Usado'}
+              </Badge>
+            </div>
+          </div>
+          <RoleGuard requireWrite>
+            <TooltipProvider>
+              <div className="collection-list-actions" onClick={(e) => e.stopPropagation()}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setEditingRecord(record);
+                        setShowForm(true);
+                      }}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Editar disco</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDelete(record.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Excluir disco</TooltipContent>
+                </Tooltip>
+              </div>
+            </TooltipProvider>
+          </RoleGuard>
+        </div>
+      ))}
+    </div>
+  );
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -123,19 +297,39 @@ export function RecordList() {
         </RoleGuard>
       </div>
 
-      <div className="flex items-center gap-4">
-        <span className="text-sm font-medium">Filtrar por formato:</span>
-        <Select value={formatFilter} onValueChange={setFormatFilter}>
-          <SelectTrigger className="w-40">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos</SelectItem>
-            <SelectItem value="vinil">Vinil</SelectItem>
-            <SelectItem value="cd">CD</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+      <CollectionFilters
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        sortBy={sortBy}
+        onSortChange={setSortBy}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        filters={[
+          {
+            label: "Formato",
+            value: formatFilter,
+            options: [
+              { label: "Todos", value: "all" },
+              { label: "Vinil", value: "vinil" },
+              { label: "CD", value: "cd" }
+            ],
+            onChange: setFormatFilter
+          },
+          {
+            label: "Condição",
+            value: conditionFilter,
+            options: [
+              { label: "Todos", value: "all" },
+              { label: "Novo", value: "new" },
+              { label: "Usado", value: "used" }
+            ],
+            onChange: setConditionFilter
+          }
+        ]}
+        activeFiltersCount={activeFiltersCount}
+        onClearFilters={handleClearFilters}
+        searchPlaceholder="Buscar por álbum ou artista..."
+      />
 
       {loading ? (
         <div className="collection-grid">
@@ -150,76 +344,21 @@ export function RecordList() {
             </Card>
           ))}
         </div>
-      ) : records.length === 0 ? (
-        <div className="text-center py-12">
-          <Disc3 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-lg font-medium mb-2">Nenhum disco encontrado</h3>
-          <p className="text-muted-foreground mb-4">
-            {formatFilter !== "all" 
-              ? `Nenhum disco encontrado no formato ${formatFilter}` 
-              : "Comece adicionando seu primeiro disco"
-            }
-          </p>
-          <RoleGuard requireWrite>
-            <Button onClick={() => setShowForm(true)}>
-              <Plus className="mr-2 h-4 w-4" />
-              Adicionar Primeiro Disco
-            </Button>
-          </RoleGuard>
-        </div>
+      ) : filteredAndSortedRecords.length === 0 ? (
+        <EmptyState
+          icon={Disc3}
+          title={searchTerm || formatFilter !== "all" || conditionFilter !== "all" ? "Nenhum disco encontrado" : "Comece sua coleção"}
+          description={
+            searchTerm || formatFilter !== "all" || conditionFilter !== "all"
+              ? "Tente ajustar os filtros ou fazer uma nova busca."
+              : "Adicione seu primeiro disco e comece a organizar sua coleção musical."
+          }
+          actionLabel="Adicionar Primeiro Disco"
+          onAction={() => setShowForm(true)}
+          showAction={records.length === 0}
+        />
       ) : (
-        <div className="collection-grid">
-          {records.map((record) => (
-            <Card key={record.id} className="collection-card" onClick={() => setSelectedRecord(record)}>
-              {record.image_url ? (
-                <div className="h-[220px] flex items-center justify-center bg-muted">
-                  <img
-                    src={record.image_url}
-                    alt={record.album}
-                    className="collection-thumbnail"
-                  />
-                </div>
-              ) : (
-                <div className="h-[220px] bg-muted flex items-center justify-center">
-                  <Disc3 className="h-12 w-12 text-muted-foreground" />
-                </div>
-              )}
-              <CardContent className="collection-card-content">
-                <h3 className="font-semibold text-lg line-clamp-2">{record.album}</h3>
-                <p className="text-muted-foreground text-sm">{record.artist}</p>
-                <div className="flex gap-2 flex-wrap">
-                  <Badge variant={record.format === 'vinil' ? 'default' : 'secondary'}>
-                    {record.format.toUpperCase()}
-                  </Badge>
-                  <Badge variant={record.is_new ? 'default' : 'outline'}>
-                    {record.is_new ? 'Novo' : 'Usado'}
-                  </Badge>
-                </div>
-                <RoleGuard requireWrite>
-                  <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setEditingRecord(record);
-                        setShowForm(true);
-                      }}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDelete(record.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </RoleGuard>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        viewMode === 'grid' ? renderGridView() : renderListView()
       )}
 
       {selectedRecord && (

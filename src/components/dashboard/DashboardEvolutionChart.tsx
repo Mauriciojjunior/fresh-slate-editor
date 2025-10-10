@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid } from "recharts";
 import { TrendingUp } from "lucide-react";
 
 interface MonthlyData {
@@ -35,29 +35,27 @@ export function DashboardEvolutionChart({ data }: DashboardEvolutionChartProps) 
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="h-[300px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={data} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-              <XAxis 
-                dataKey="month" 
-                stroke="hsl(var(--muted-foreground))"
-                fontSize={12}
-              />
-              <YAxis 
-                stroke="hsl(var(--muted-foreground))"
-                fontSize={12}
-              />
-              <ChartTooltip content={<ChartTooltipContent />} />
-              <Line 
-                type="monotone" 
-                dataKey="total" 
-                stroke="hsl(var(--primary))" 
-                strokeWidth={2}
-                dot={{ fill: "hsl(var(--primary))", r: 4 }}
-                activeDot={{ r: 6 }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
+          <LineChart data={data} margin={{ top: 5, right: 10, left: 10, bottom: 5 }} width={800} height={300}>
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+            <XAxis 
+              dataKey="month" 
+              stroke="hsl(var(--muted-foreground))"
+              fontSize={12}
+            />
+            <YAxis 
+              stroke="hsl(var(--muted-foreground))"
+              fontSize={12}
+            />
+            <ChartTooltip content={<ChartTooltipContent />} />
+            <Line 
+              type="monotone" 
+              dataKey="total" 
+              stroke="hsl(var(--primary))" 
+              strokeWidth={2}
+              dot={{ fill: "hsl(var(--primary))", r: 4 }}
+              activeDot={{ r: 6 }}
+            />
+          </LineChart>
         </ChartContainer>
       </CardContent>
     </Card>
