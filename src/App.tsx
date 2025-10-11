@@ -13,6 +13,9 @@ import Bebidas from "./pages/Bebidas";
 import Jogos from "./pages/Jogos";
 import Relatorios from "./pages/Relatorios";
 import Admin from "./pages/Admin";
+import BebidasAdmin from "./pages/admin/BebidasAdmin";
+import LivrosAdmin from "./pages/admin/LivrosAdmin";
+import UsuariosAdmin from "./pages/admin/UsuariosAdmin";
 import Profile from "./pages/Profile";
 import Exportacao from "./pages/Exportacao";
 
@@ -35,6 +38,9 @@ const App = () => (
             <Route path="/relatorios" element={<Relatorios />} />
             <Route path="/exportacao" element={<Exportacao />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/admin/bebidas" element={<BebidasAdmin />} />
+            <Route path="/admin/livros" element={<LivrosAdmin />} />
+            <Route path="/admin/usuarios" element={<UsuariosAdmin />} />
             <Route path="/perfil" element={<Profile />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
