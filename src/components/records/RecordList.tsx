@@ -30,6 +30,8 @@ export function RecordList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [formatFilter, setFormatFilter] = useState("all");
   const [conditionFilter, setConditionFilter] = useState("all");
+  const [revisadoFilter, setRevisadoFilter] = useState("all");
+  const [riscadoFilter, setRiscadoFilter] = useState("all");
   const [sortBy, setSortBy] = useState<SortOption>("name-asc");
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [showForm, setShowForm] = useState(false);
@@ -104,7 +106,17 @@ export function RecordList() {
         (conditionFilter === "new" && record.is_new) ||
         (conditionFilter === "used" && !record.is_new);
       
-      return matchesSearch && matchesFormat && matchesCondition;
+      const matchesRevisado = 
+        revisadoFilter === "all" ||
+        (revisadoFilter === "yes" && record.revisado) ||
+        (revisadoFilter === "no" && !record.revisado);
+      
+      const matchesRiscado = 
+        riscadoFilter === "all" ||
+        (riscadoFilter === "yes" && record.riscado) ||
+        (riscadoFilter === "no" && !record.riscado);
+      
+      return matchesSearch && matchesFormat && matchesCondition && matchesRevisado && matchesRiscado;
     })
     .sort((a, b) => {
       switch (sortBy) {
@@ -130,12 +142,16 @@ export function RecordList() {
   const activeFiltersCount = 
     (searchTerm ? 1 : 0) + 
     (formatFilter !== "all" ? 1 : 0) +
-    (conditionFilter !== "all" ? 1 : 0);
+    (conditionFilter !== "all" ? 1 : 0) +
+    (revisadoFilter !== "all" ? 1 : 0) +
+    (riscadoFilter !== "all" ? 1 : 0);
 
   const handleClearFilters = () => {
     setSearchTerm("");
     setFormatFilter("all");
     setConditionFilter("all");
+    setRevisadoFilter("all");
+    setRiscadoFilter("all");
   };
 
   if (showForm) {
@@ -334,6 +350,26 @@ export function RecordList() {
               { label: "Usado", value: "used" }
             ],
             onChange: setConditionFilter
+          },
+          {
+            label: "Revisado",
+            value: revisadoFilter,
+            options: [
+              { label: "Todos", value: "all" },
+              { label: "Sim", value: "yes" },
+              { label: "Não", value: "no" }
+            ],
+            onChange: setRevisadoFilter
+          },
+          {
+            label: "Riscado",
+            value: riscadoFilter,
+            options: [
+              { label: "Todos", value: "all" },
+              { label: "Sim", value: "yes" },
+              { label: "Não", value: "no" }
+            ],
+            onChange: setRiscadoFilter
           }
         ]}
         activeFiltersCount={activeFiltersCount}
@@ -357,9 +393,9 @@ export function RecordList() {
       ) : filteredAndSortedRecords.length === 0 ? (
         <EmptyState
           icon={Disc3}
-          title={searchTerm || formatFilter !== "all" || conditionFilter !== "all" ? "Nenhum disco encontrado" : "Comece sua coleção"}
+          title={searchTerm || formatFilter !== "all" || conditionFilter !== "all" || revisadoFilter !== "all" || riscadoFilter !== "all" ? "Nenhum disco encontrado" : "Comece sua coleção"}
           description={
-            searchTerm || formatFilter !== "all" || conditionFilter !== "all"
+            searchTerm || formatFilter !== "all" || conditionFilter !== "all" || revisadoFilter !== "all" || riscadoFilter !== "all"
               ? "Tente ajustar os filtros ou fazer uma nova busca."
               : "Adicione seu primeiro disco e comece a organizar sua coleção musical."
           }

@@ -27,6 +27,11 @@ interface RecordsByFormat {
   count: number;
 }
 
+interface RecordsCondition {
+  name: string;
+  count: number;
+}
+
 interface DrinksByType {
   name: string;
   count: number;
@@ -35,11 +40,14 @@ interface DrinksByType {
 interface ReportData {
   booksByCategory: BooksByCategory[];
   recordsByFormat: RecordsByFormat[];
+  recordsCondition: RecordsCondition[];
   drinksByType: DrinksByType[];
   totalGames: number;
   totalBooks: number;
   totalRecords: number;
   totalDrinks: number;
+  recordsRevisados: number;
+  recordsRiscados: number;
 }
 
 const COLORS = [
@@ -57,11 +65,14 @@ export function ReportsPage() {
   const [data, setData] = useState<ReportData>({
     booksByCategory: [],
     recordsByFormat: [],
+    recordsCondition: [],
     drinksByType: [],
     totalGames: 0,
     totalBooks: 0,
     totalRecords: 0,
     totalDrinks: 0,
+    recordsRevisados: 0,
+    recordsRiscados: 0,
   });
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
@@ -86,7 +97,7 @@ export function ReportsPage() {
       // Fetch records by format
       const { data: recordsData, error: recordsError } = await supabase
         .from('records')
-        .select('format');
+        .select('format, revisado, riscado');
 
       if (recordsError) throw recordsError;
 
@@ -130,6 +141,16 @@ export function ReportsPage() {
         count: count as number,
       }));
 
+      // Calculate records condition stats
+      const recordsRevisados = recordsData?.filter(r => r.revisado).length || 0;
+      const recordsRiscados = recordsData?.filter(r => r.riscado).length || 0;
+      
+      const recordsConditionData = [
+        { name: 'Revisado', count: recordsRevisados },
+        { name: 'Riscado', count: recordsRiscados },
+        { name: 'Sem marcação', count: (recordsData?.length || 0) - recordsRevisados - recordsRiscados },
+      ].filter(item => item.count > 0);
+
       // Process drinks by type
       const drinksByType = drinksData?.reduce((acc: { [key: string]: number }, drink: any) => {
         const typeName = drink.drink_types?.name || 'Sem tipo';
@@ -145,11 +166,14 @@ export function ReportsPage() {
       setData({
         booksByCategory: booksCategoryData,
         recordsByFormat: recordsFormatData,
+        recordsCondition: recordsConditionData,
         drinksByType: drinksTypeData,
         totalGames: gamesCount || 0,
         totalBooks: booksData?.length || 0,
         totalRecords: recordsData?.length || 0,
         totalDrinks: drinksData?.length || 0,
+        recordsRevisados,
+        recordsRiscados,
       });
 
     } catch (error: any) {
@@ -306,6 +330,36 @@ export function ReportsPage() {
                   <YAxis />
                   <Tooltip />
                   <Bar dataKey="count" fill="hsl(173, 58%, 39%)" />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+                Nenhum disco cadastrado
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Records Condition - Bar Chart */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Disc3 className="h-5 w-5 text-teal-600" />
+              Estado dos Discos
+            </CardTitle>
+            <CardDescription>
+              Discos revisados e riscados
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {data.recordsCondition.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={data.recordsCondition}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar dataKey="count" fill="hsl(160, 60%, 45%)" />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
