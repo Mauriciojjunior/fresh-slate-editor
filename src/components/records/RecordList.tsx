@@ -19,6 +19,8 @@ interface Record {
   format: 'vinil' | 'cd';
   image_url: string | null;
   is_new: boolean;
+  revisado: boolean;
+  riscado: boolean;
   created_at: string;
 }
 
@@ -176,6 +178,12 @@ export function RecordList() {
               <Badge variant={record.is_new ? 'default' : 'outline'}>
                 {record.is_new ? 'Novo' : 'Usado'}
               </Badge>
+              {record.revisado && (
+                <Badge variant="outline">Revisado</Badge>
+              )}
+              {record.riscado && (
+                <Badge variant="destructive">Riscado</Badge>
+              )}
             </div>
             <RoleGuard requireWrite>
               <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
@@ -243,6 +251,12 @@ export function RecordList() {
               <Badge variant={record.is_new ? 'default' : 'outline'}>
                 {record.is_new ? 'Novo' : 'Usado'}
               </Badge>
+              {record.revisado && (
+                <Badge variant="outline">Revisado</Badge>
+              )}
+              {record.riscado && (
+                <Badge variant="destructive">Riscado</Badge>
+              )}
             </div>
           </div>
           <RoleGuard requireWrite>
@@ -377,6 +391,18 @@ export function RecordList() {
               label: "Condição", 
               value: <Badge variant={selectedRecord.is_new ? 'default' : 'outline'}>
                 {selectedRecord.is_new ? 'Novo' : 'Usado'}
+              </Badge>
+            },
+            { 
+              label: "Revisado", 
+              value: <Badge variant={selectedRecord.revisado ? 'outline' : 'secondary'}>
+                {selectedRecord.revisado ? 'Sim' : 'Não'}
+              </Badge>
+            },
+            { 
+              label: "Riscado", 
+              value: <Badge variant={selectedRecord.riscado ? 'destructive' : 'secondary'}>
+                {selectedRecord.riscado ? 'Sim' : 'Não'}
               </Badge>
             },
           ]}

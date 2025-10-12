@@ -17,6 +17,8 @@ interface Record {
   format: 'vinil' | 'cd';
   image_url: string | null;
   is_new: boolean;
+  revisado: boolean;
+  riscado: boolean;
 }
 
 interface RecordFormProps {
@@ -33,6 +35,8 @@ export function RecordForm({ record, onSuccess, onCancel }: RecordFormProps) {
     format: record?.format || "vinil",
     image_url: record?.image_url || "",
     is_new: record?.is_new ?? true,
+    revisado: record?.revisado ?? false,
+    riscado: record?.riscado ?? false,
   });
   const { toast } = useToast();
 
@@ -47,6 +51,8 @@ export function RecordForm({ record, onSuccess, onCancel }: RecordFormProps) {
         format: formData.format,
         image_url: formData.image_url || null,
         is_new: formData.is_new,
+        revisado: formData.revisado,
+        riscado: formData.riscado,
       };
 
       if (record) {
@@ -156,6 +162,24 @@ export function RecordForm({ record, onSuccess, onCancel }: RecordFormProps) {
                 onCheckedChange={(checked) => setFormData({ ...formData, is_new: !!checked })}
               />
               <Label htmlFor="is_new">Disco novo (não usado)</Label>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="revisado"
+                checked={formData.revisado}
+                onCheckedChange={(checked) => setFormData({ ...formData, revisado: !!checked })}
+              />
+              <Label htmlFor="revisado">Revisado</Label>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="riscado"
+                checked={formData.riscado}
+                onCheckedChange={(checked) => setFormData({ ...formData, riscado: !!checked })}
+              />
+              <Label htmlFor="riscado">Riscado</Label>
             </div>
 
             <div className="grid gap-2">
