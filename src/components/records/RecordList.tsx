@@ -30,8 +30,8 @@ export function RecordList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [formatFilter, setFormatFilter] = useState("all");
   const [conditionFilter, setConditionFilter] = useState("all");
-  const [revisadoFilter, setRevisadoFilter] = useState("all");
-  const [riscadoFilter, setRiscadoFilter] = useState("all");
+  const [showRevisado, setShowRevisado] = useState(false);
+  const [showRiscado, setShowRiscado] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>("name-asc");
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [showForm, setShowForm] = useState(false);
@@ -106,15 +106,8 @@ export function RecordList() {
         (conditionFilter === "new" && record.is_new) ||
         (conditionFilter === "used" && !record.is_new);
       
-      const matchesRevisado = 
-        revisadoFilter === "all" ||
-        (revisadoFilter === "yes" && record.revisado) ||
-        (revisadoFilter === "no" && !record.revisado);
-      
-      const matchesRiscado = 
-        riscadoFilter === "all" ||
-        (riscadoFilter === "yes" && record.riscado) ||
-        (riscadoFilter === "no" && !record.riscado);
+      const matchesRevisado = !showRevisado || record.revisado;
+      const matchesRiscado = !showRiscado || record.riscado;
       
       return matchesSearch && matchesFormat && matchesCondition && matchesRevisado && matchesRiscado;
     })
@@ -143,15 +136,15 @@ export function RecordList() {
     (searchTerm ? 1 : 0) + 
     (formatFilter !== "all" ? 1 : 0) +
     (conditionFilter !== "all" ? 1 : 0) +
-    (revisadoFilter !== "all" ? 1 : 0) +
-    (riscadoFilter !== "all" ? 1 : 0);
+    (showRevisado ? 1 : 0) +
+    (showRiscado ? 1 : 0);
 
   const handleClearFilters = () => {
     setSearchTerm("");
     setFormatFilter("all");
     setConditionFilter("all");
-    setRevisadoFilter("all");
-    setRiscadoFilter("all");
+    setShowRevisado(false);
+    setShowRiscado(false);
   };
 
   if (showForm) {
@@ -350,26 +343,18 @@ export function RecordList() {
               { label: "Usado", value: "used" }
             ],
             onChange: setConditionFilter
-          },
+          }
+        ]}
+        checkboxFilters={[
           {
             label: "Revisado",
-            value: revisadoFilter,
-            options: [
-              { label: "Todos", value: "all" },
-              { label: "Sim", value: "yes" },
-              { label: "Não", value: "no" }
-            ],
-            onChange: setRevisadoFilter
+            checked: showRevisado,
+            onChange: setShowRevisado
           },
           {
             label: "Riscado",
-            value: riscadoFilter,
-            options: [
-              { label: "Todos", value: "all" },
-              { label: "Sim", value: "yes" },
-              { label: "Não", value: "no" }
-            ],
-            onChange: setRiscadoFilter
+            checked: showRiscado,
+            onChange: setShowRiscado
           }
         ]}
         activeFiltersCount={activeFiltersCount}
@@ -393,9 +378,9 @@ export function RecordList() {
       ) : filteredAndSortedRecords.length === 0 ? (
         <EmptyState
           icon={Disc3}
-          title={searchTerm || formatFilter !== "all" || conditionFilter !== "all" || revisadoFilter !== "all" || riscadoFilter !== "all" ? "Nenhum disco encontrado" : "Comece sua coleção"}
+          title={searchTerm || formatFilter !== "all" || conditionFilter !== "all" || showRevisado || showRiscado ? "Nenhum disco encontrado" : "Comece sua coleção"}
           description={
-            searchTerm || formatFilter !== "all" || conditionFilter !== "all" || revisadoFilter !== "all" || riscadoFilter !== "all"
+            searchTerm || formatFilter !== "all" || conditionFilter !== "all" || showRevisado || showRiscado
               ? "Tente ajustar os filtros ou fazer uma nova busca."
               : "Adicione seu primeiro disco e comece a organizar sua coleção musical."
           }

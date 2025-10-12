@@ -3,6 +3,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, SlidersHorizontal, Grid3x3, List, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 export type SortOption = 'name-asc' | 'name-desc' | 'recent' | 'oldest';
 export type ViewMode = 'grid' | 'list';
@@ -20,6 +22,11 @@ interface CollectionFiltersProps {
     options: { label: string; value: string }[];
     onChange: (value: string) => void;
   }[];
+  checkboxFilters?: {
+    label: string;
+    checked: boolean;
+    onChange: (checked: boolean) => void;
+  }[];
   activeFiltersCount?: number;
   onClearFilters?: () => void;
   searchPlaceholder?: string;
@@ -33,6 +40,7 @@ export function CollectionFilters({
   viewMode,
   onViewModeChange,
   filters = [],
+  checkboxFilters = [],
   activeFiltersCount = 0,
   onClearFilters,
   searchPlaceholder = "Buscar..."
@@ -73,6 +81,23 @@ export function CollectionFilters({
               ))}
             </SelectContent>
           </Select>
+        ))}
+
+        {/* Checkbox Filters */}
+        {checkboxFilters.map((filter) => (
+          <div key={filter.label} className="flex items-center gap-2 border rounded-md px-3 py-2">
+            <Checkbox 
+              id={filter.label}
+              checked={filter.checked}
+              onCheckedChange={filter.onChange}
+            />
+            <Label 
+              htmlFor={filter.label}
+              className="text-sm font-medium cursor-pointer"
+            >
+              {filter.label}
+            </Label>
+          </div>
         ))}
 
         {/* Sort */}
