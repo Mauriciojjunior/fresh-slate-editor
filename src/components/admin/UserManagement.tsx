@@ -33,16 +33,11 @@ export function UserManagement() {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      
-      // Fetch users from auth admin (requires service role key)
-      const { data: authUsersData, error: authError } = await supabase.auth.admin.listUsers();
-      
-      if (authError) throw authError;
 
-      // Fetch profiles and roles
+      // Fetch profiles with email
       const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
-        .select('id, full_name, created_at');
+        .select('id, full_name, email, created_at');
 
       if (profilesError) throw profilesError;
 
@@ -52,56 +47,25 @@ export function UserManagement() {
 
       if (rolesError) throw rolesError;
 
-      // Combine data
-      const usersWithRoles: UserWithRole[] = authUsersData.users.map(authUser => {
-        const profile = profilesData.find(p => p.id === authUser.id);
-        const userRole = rolesData.find(r => r.user_id === authUser.id);
-        
+      const usersWithRoles: UserWithRole[] = profilesData.map(profile => {
+        const userRole = rolesData.find(role => role.user_id === profile.id);
         return {
-          id: authUser.id,
-          email: authUser.email || 'Sem email',
-          full_name: profile?.full_name || null,
+          id: profile.id,
+          email: profile.email || 'Sem email',
+          full_name: profile.full_name,
           role: (userRole?.role as UserRole) || 'user',
-          created_at: authUser.created_at,
+          created_at: profile.created_at,
         };
       });
 
       setUsers(usersWithRoles);
     } catch (error) {
       console.error('Error fetching users:', error);
-      // Fallback to profiles only if auth admin fails
-      try {
-        const { data: profilesData, error: profilesError } = await supabase
-          .from('profiles')
-          .select('id, full_name, created_at');
-
-        if (profilesError) throw profilesError;
-
-        const { data: rolesData, error: rolesError } = await supabase
-          .from('user_roles')
-          .select('user_id, role');
-
-        if (rolesError) throw rolesError;
-
-        const usersWithRoles: UserWithRole[] = profilesData.map(profile => {
-          const userRole = rolesData.find(role => role.user_id === profile.id);
-          return {
-            id: profile.id,
-            email: 'Email não disponível',
-            full_name: profile.full_name,
-            role: (userRole?.role as UserRole) || 'user',
-            created_at: profile.created_at,
-          };
-        });
-
-        setUsers(usersWithRoles);
-      } catch (fallbackError) {
-        toast({
-          title: "Erro",
-          description: "Não foi possível carregar os usuários.",
-          variant: "destructive",
-        });
-      }
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar os usuários.",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }

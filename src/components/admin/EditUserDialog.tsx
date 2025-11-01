@@ -47,7 +47,7 @@ export function EditUserDialog({ user, open, onOpenChange, onUserUpdated }: Edit
     setLoading(true);
 
     try {
-      // Update profile
+      // Update profile (email cannot be changed from profiles table)
       const { error: profileError } = await supabase
         .from('profiles')
         .update({ full_name: formData.full_name })

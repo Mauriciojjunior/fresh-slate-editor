@@ -242,6 +242,7 @@ export type Database = {
           action_count: number | null
           approved: boolean
           created_at: string
+          email: string | null
           full_name: string | null
           id: string
           last_login_at: string | null
@@ -251,6 +252,7 @@ export type Database = {
           action_count?: number | null
           approved?: boolean
           created_at?: string
+          email?: string | null
           full_name?: string | null
           id: string
           last_login_at?: string | null
@@ -260,6 +262,7 @@ export type Database = {
           action_count?: number | null
           approved?: boolean
           created_at?: string
+          email?: string | null
           full_name?: string | null
           id?: string
           last_login_at?: string | null
