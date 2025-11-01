@@ -2,6 +2,7 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { RouteGuard } from "@/components/auth/RouteGuard";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { UserManagement } from "@/components/admin/UserManagement";
+import { UserApprovalCard } from "@/components/admin/UserApprovalCard";
 
 export default function UsuariosAdmin() {
   return (
@@ -16,6 +17,7 @@ export default function UsuariosAdmin() {
               </p>
             </div>
 
+            <UserApprovalCard />
             <UserManagement />
           </div>
         </AppLayout>

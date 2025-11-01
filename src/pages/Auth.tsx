@@ -4,7 +4,10 @@ import { Package } from "lucide-react";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { SignUpForm } from "@/components/auth/SignUpForm";
 import { ForgotPasswordForm } from "@/components/auth/ForgotPasswordForm";
+import { PendingApprovalMessage } from "@/components/auth/PendingApprovalMessage";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 
 type AuthMode = "login" | "signup" | "forgot";
 
@@ -13,15 +16,31 @@ export default function Auth() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
 
+  const { data: userProfile, isLoading: profileLoading } = useQuery({
+    queryKey: ['user-profile', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('approved')
+        .eq('id', user.id)
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user?.id
+  });
+
   useEffect(() => {
-    // Redirect to home if user is already authenticated
-    if (user && !loading) {
+    // Redirect to home if user is authenticated and approved
+    if (user && !loading && !profileLoading && userProfile?.approved) {
       navigate("/");
     }
-  }, [user, loading, navigate]);
+  }, [user, loading, profileLoading, userProfile, navigate]);
 
   // Show loading while checking auth state
-  if (loading) {
+  if (loading || profileLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
@@ -30,6 +49,11 @@ export default function Auth() {
         </div>
       </div>
     );
+  }
+
+  // Show pending approval message if user is logged in but not approved
+  if (user && userProfile && !userProfile.approved) {
+    return <PendingApprovalMessage />;
   }
 
   return (
