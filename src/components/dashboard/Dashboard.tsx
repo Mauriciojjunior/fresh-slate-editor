@@ -224,11 +224,15 @@ export function Dashboard() {
 
       {/* Collection Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {collections.map((collection) => {
+        {collections.map((collection, index) => {
           const Icon = collection.icon;
           
           return (
-            <Card key={collection.title} className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+            <Card 
+              key={collection.title} 
+              className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 animate-fade-in"
+              style={{ animationDelay: `${index * 100}ms` }}
+            >
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <div className={`p-3 rounded-lg ${collection.bgColor}`}>
