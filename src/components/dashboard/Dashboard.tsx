@@ -12,10 +12,10 @@ import { DashboardEvolutionChart } from "./DashboardEvolutionChart";
 import { RecentItemsCard } from "./RecentItemsCard";
 import { DetailedStatsModal } from "./DetailedStatsModal";
 import { QuickAddButton } from "./QuickAddButton";
-import { Book3DIcon } from "@/components/icons/Book3DIcon";
-import { Disc3DIcon } from "@/components/icons/Disc3DIcon";
-import { Drink3DIcon } from "@/components/icons/Drink3DIcon";
-import { Game3DIcon } from "@/components/icons/Game3DIcon";
+import { BookColorIcon } from "@/components/icons/BookColorIcon";
+import { DiscColorIcon } from "@/components/icons/DiscColorIcon";
+import { DrinkColorIcon } from "@/components/icons/DrinkColorIcon";
+import { GameColorIcon } from "@/components/icons/GameColorIcon";
 
 interface CollectionCounts {
   books: number;
@@ -178,7 +178,7 @@ export function Dashboard() {
       title: "Livros",
       description: "Sua biblioteca pessoal",
       count: counts.books,
-      Icon3D: Book3DIcon,
+      ColorIcon: BookColorIcon,
       icon: Book,
       link: "/livros",
       bgGradient: "bg-gradient-to-br from-purple-100 via-purple-50 to-pink-50",
@@ -187,7 +187,7 @@ export function Dashboard() {
       title: "Discos",
       description: "Coleção de vinis e CDs",
       count: counts.records,
-      Icon3D: Disc3DIcon,
+      ColorIcon: DiscColorIcon,
       icon: Disc3,
       link: "/discos",
       bgGradient: "bg-gradient-to-br from-pink-100 via-pink-50 to-rose-50",
@@ -196,7 +196,7 @@ export function Dashboard() {
       title: "Bebidas",
       description: "Sua adega e bar",
       count: counts.drinks,
-      Icon3D: Drink3DIcon,
+      ColorIcon: DrinkColorIcon,
       icon: Wine,
       link: "/bebidas",
       bgGradient: "bg-gradient-to-br from-emerald-100 via-green-50 to-teal-50",
@@ -205,7 +205,7 @@ export function Dashboard() {
       title: "Jogos",
       description: "Jogos de tabuleiro",
       count: counts.boardGames,
-      Icon3D: Game3DIcon,
+      ColorIcon: GameColorIcon,
       icon: Gamepad2,
       link: "/jogos",
       bgGradient: "bg-gradient-to-br from-blue-100 via-cyan-50 to-sky-50",
@@ -229,7 +229,7 @@ export function Dashboard() {
       {/* Collection Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {collections.map((collection, index) => {
-          const Icon3D = collection.Icon3D;
+          const ColorIcon = collection.ColorIcon;
           
           return (
             <Card 
@@ -239,8 +239,8 @@ export function Dashboard() {
             >
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
-                  <div className={`h-24 w-24 rounded-xl ${collection.bgGradient} shadow-lg`}>
-                    <Icon3D />
+                  <div className={`h-24 w-24 rounded-xl ${collection.bgGradient} shadow-lg p-3 group-hover:scale-110 transition-transform duration-300`}>
+                    <ColorIcon />
                   </div>
                   <div className="text-right">
                     {loading ? (
