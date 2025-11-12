@@ -1,14 +1,11 @@
 import { Canvas } from '@react-three/fiber';
 import { Float, PerspectiveCamera } from '@react-three/drei';
-import { useRef } from 'react';
-import * as THREE from 'three';
 
 function Drink3D() {
-  const groupRef = useRef<THREE.Group>(null);
 
   return (
     <Float speed={2.5} rotationIntensity={0.3} floatIntensity={0.7}>
-      <group ref={groupRef} rotation={[0.2, 0.3, 0]}>
+      <group rotation={[0.2, 0.3, 0]}>
         {/* Wine Bottle Body */}
         <mesh position={[0, 0, 0]}>
           <cylinderGeometry args={[0.35, 0.4, 2, 32]} />
@@ -89,7 +86,7 @@ function Drink3D() {
   );
 }
 
-export function Drink3DIcon() {
+export const Drink3DIcon = () => {
   return (
     <div className="w-full h-full">
       <Canvas>
@@ -98,4 +95,4 @@ export function Drink3DIcon() {
       </Canvas>
     </div>
   );
-}
+};

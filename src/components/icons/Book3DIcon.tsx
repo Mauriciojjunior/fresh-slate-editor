@@ -1,14 +1,10 @@
 import { Canvas } from '@react-three/fiber';
 import { Float, PerspectiveCamera } from '@react-three/drei';
-import { useRef } from 'react';
-import * as THREE from 'three';
 
 function Book3D() {
-  const groupRef = useRef<THREE.Group>(null);
-
   return (
     <Float speed={2} rotationIntensity={0.5} floatIntensity={0.5}>
-      <group ref={groupRef} rotation={[0.3, -0.5, 0]}>
+      <group rotation={[0.3, -0.5, 0]}>
         {/* Book Cover */}
         <mesh position={[0, 0, 0.05]}>
           <boxGeometry args={[1.2, 1.6, 0.1]} />
@@ -41,7 +37,7 @@ function Book3D() {
   );
 }
 
-export function Book3DIcon() {
+export const Book3DIcon = () => {
   return (
     <div className="w-full h-full">
       <Canvas>
@@ -50,4 +46,4 @@ export function Book3DIcon() {
       </Canvas>
     </div>
   );
-}
+};

@@ -1,14 +1,10 @@
 import { Canvas } from '@react-three/fiber';
 import { Float, PerspectiveCamera } from '@react-three/drei';
-import { useRef } from 'react';
-import * as THREE from 'three';
 
 function Game3D() {
-  const groupRef = useRef<THREE.Group>(null);
-
   return (
     <Float speed={2} rotationIntensity={0.8} floatIntensity={0.6}>
-      <group ref={groupRef} rotation={[0.3, 0.4, 0]}>
+      <group rotation={[0.3, 0.4, 0]}>
         {/* Game Controller Body */}
         <mesh>
           <boxGeometry args={[2, 1, 0.4]} />
@@ -85,7 +81,7 @@ function Game3D() {
   );
 }
 
-export function Game3DIcon() {
+export const Game3DIcon = () => {
   return (
     <div className="w-full h-full">
       <Canvas>
@@ -94,4 +90,4 @@ export function Game3DIcon() {
       </Canvas>
     </div>
   );
-}
+};

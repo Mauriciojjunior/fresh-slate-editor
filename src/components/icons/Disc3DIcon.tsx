@@ -1,14 +1,10 @@
 import { Canvas } from '@react-three/fiber';
 import { Float, PerspectiveCamera } from '@react-three/drei';
-import { useRef } from 'react';
-import * as THREE from 'three';
 
 function Disc3D() {
-  const groupRef = useRef<THREE.Group>(null);
-
   return (
     <Float speed={2} rotationIntensity={1} floatIntensity={0.5}>
-      <group ref={groupRef} rotation={[0.4, 0, 0]}>
+      <group rotation={[0.4, 0, 0]}>
         {/* Main Disc */}
         <mesh>
           <cylinderGeometry args={[1, 1, 0.05, 32]} />
@@ -41,7 +37,7 @@ function Disc3D() {
   );
 }
 
-export function Disc3DIcon() {
+export const Disc3DIcon = () => {
   return (
     <div className="w-full h-full">
       <Canvas>
@@ -50,4 +46,4 @@ export function Disc3DIcon() {
       </Canvas>
     </div>
   );
-}
+};
