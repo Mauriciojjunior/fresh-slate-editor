@@ -1,6 +1,6 @@
 export const DiscColorIcon = () => {
   return (
-    <svg viewBox="0 0 100 100" className="w-full h-full animate-float">
+    <svg viewBox="0 0 100 100" className="w-full h-full">
       <defs>
         <radialGradient id="vinylGrad">
           <stop offset="0%" style={{ stopColor: '#1F2937', stopOpacity: 1 }} />

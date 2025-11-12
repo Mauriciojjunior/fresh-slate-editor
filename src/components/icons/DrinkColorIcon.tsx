@@ -1,6 +1,6 @@
 export const DrinkColorIcon = () => {
   return (
-    <svg viewBox="0 0 100 100" className="w-full h-full animate-float">
+    <svg viewBox="0 0 100 100" className="w-full h-full">
       <defs>
         <linearGradient id="bottleGrad" x1="0%" y1="0%" x2="0%" y2="100%">
           <stop offset="0%" style={{ stopColor: '#10B981', stopOpacity: 0.9 }} />

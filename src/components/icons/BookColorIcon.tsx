@@ -1,6 +1,6 @@
 export const BookColorIcon = () => {
   return (
-    <svg viewBox="0 0 100 100" className="w-full h-full animate-float">
+    <svg viewBox="0 0 100 100" className="w-full h-full">
       <defs>
         <linearGradient id="bookGrad" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" style={{ stopColor: '#8B5CF6', stopOpacity: 1 }} />
