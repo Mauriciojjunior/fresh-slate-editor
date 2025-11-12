@@ -222,6 +222,44 @@ export function Dashboard() {
         </p>
       </div>
 
+      {/* Collection Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {collections.map((collection) => {
+          const Icon = collection.icon;
+          
+          return (
+            <Card key={collection.title} className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <div className={`p-3 rounded-lg ${collection.bgColor}`}>
+                    <Icon className={`h-6 w-6 ${collection.color}`} />
+                  </div>
+                  <div className="text-right">
+                    {loading ? (
+                      <div className="animate-pulse bg-muted h-8 w-8 rounded"></div>
+                    ) : (
+                      <div className="text-3xl font-bold text-foreground">
+                        {collection.count}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <CardTitle className="text-lg">{collection.title}</CardTitle>
+                <CardDescription>{collection.description}</CardDescription>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <Button asChild variant="outline" className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                  <Link to={collection.link} className="flex items-center justify-center">
+                    Ver Coleção
+                    <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+
       {/* Stats Overview */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card 
@@ -315,44 +353,6 @@ export function Dashboard() {
           <DashboardEvolutionChart data={monthlyData} />
         </div>
       )}
-
-      {/* Collection Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {collections.map((collection) => {
-          const Icon = collection.icon;
-          
-          return (
-            <Card key={collection.title} className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <div className={`p-3 rounded-lg ${collection.bgColor}`}>
-                    <Icon className={`h-6 w-6 ${collection.color}`} />
-                  </div>
-                  <div className="text-right">
-                    {loading ? (
-                      <div className="animate-pulse bg-muted h-8 w-8 rounded"></div>
-                    ) : (
-                      <div className="text-3xl font-bold text-foreground">
-                        {collection.count}
-                      </div>
-                    )}
-                  </div>
-                </div>
-                <CardTitle className="text-lg">{collection.title}</CardTitle>
-                <CardDescription>{collection.description}</CardDescription>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <Button asChild variant="outline" className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                  <Link to={collection.link} className="flex items-center justify-center">
-                    Ver Coleção
-                    <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                  </Link>
-                </Button>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
 
       {/* Quick Actions */}
       {totalItems === 0 && (
