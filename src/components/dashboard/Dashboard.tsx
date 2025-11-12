@@ -12,6 +12,10 @@ import { DashboardEvolutionChart } from "./DashboardEvolutionChart";
 import { RecentItemsCard } from "./RecentItemsCard";
 import { DetailedStatsModal } from "./DetailedStatsModal";
 import { QuickAddButton } from "./QuickAddButton";
+import { Book3DIcon } from "@/components/icons/Book3DIcon";
+import { Disc3DIcon } from "@/components/icons/Disc3DIcon";
+import { Drink3DIcon } from "@/components/icons/Drink3DIcon";
+import { Game3DIcon } from "@/components/icons/Game3DIcon";
 
 interface CollectionCounts {
   books: number;
@@ -174,37 +178,37 @@ export function Dashboard() {
       title: "Livros",
       description: "Sua biblioteca pessoal",
       count: counts.books,
+      Icon3D: Book3DIcon,
       icon: Book,
       link: "/livros",
-      color: "text-emerald-600",
-      bgColor: "bg-emerald-50",
+      bgGradient: "bg-gradient-to-br from-purple-100 via-purple-50 to-pink-50",
     },
     {
       title: "Discos",
       description: "Coleção de vinis e CDs",
       count: counts.records,
+      Icon3D: Disc3DIcon,
       icon: Disc3,
       link: "/discos",
-      color: "text-teal-600",
-      bgColor: "bg-teal-50",
+      bgGradient: "bg-gradient-to-br from-pink-100 via-pink-50 to-rose-50",
     },
     {
       title: "Bebidas",
       description: "Sua adega e bar",
       count: counts.drinks,
+      Icon3D: Drink3DIcon,
       icon: Wine,
       link: "/bebidas",
-      color: "text-green-600",
-      bgColor: "bg-green-50",
+      bgGradient: "bg-gradient-to-br from-emerald-100 via-green-50 to-teal-50",
     },
     {
       title: "Jogos",
       description: "Jogos de tabuleiro",
       count: counts.boardGames,
+      Icon3D: Game3DIcon,
       icon: Gamepad2,
       link: "/jogos",
-      color: "text-lime-600",
-      bgColor: "bg-lime-50",
+      bgGradient: "bg-gradient-to-br from-blue-100 via-cyan-50 to-sky-50",
     },
   ];
 
@@ -225,18 +229,18 @@ export function Dashboard() {
       {/* Collection Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {collections.map((collection, index) => {
-          const Icon = collection.icon;
+          const Icon3D = collection.Icon3D;
           
           return (
             <Card 
               key={collection.title} 
-              className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 animate-fade-in"
+              className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 animate-fade-in overflow-hidden"
               style={{ animationDelay: `${index * 100}ms` }}
             >
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
-                  <div className={`p-3 rounded-lg ${collection.bgColor}`}>
-                    <Icon className={`h-6 w-6 ${collection.color}`} />
+                  <div className={`h-24 w-24 rounded-xl ${collection.bgGradient} shadow-lg`}>
+                    <Icon3D />
                   </div>
                   <div className="text-right">
                     {loading ? (
@@ -252,8 +256,8 @@ export function Dashboard() {
                 <CardDescription>{collection.description}</CardDescription>
               </CardHeader>
               <CardContent className="pt-0">
-                <Button asChild variant="outline" className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                  <Link to={collection.link} className="flex items-center justify-center">
+                <Button asChild variant="outline" className="w-full group-hover:bg-gradient-to-r group-hover:from-primary group-hover:to-primary/80 group-hover:text-primary-foreground transition-all duration-300 border-2">
+                  <Link to={collection.link} className="flex items-center justify-center font-semibold">
                     Ver Coleção
                     <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
                   </Link>
