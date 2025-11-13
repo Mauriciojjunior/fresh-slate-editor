@@ -109,7 +109,7 @@ export function LoginForm({ onToggleMode, onForgotPassword }: LoginFormProps) {
             )}
           </Button>
           
-          <div className="flex flex-col space-y-2 text-center text-sm">
+          <div className="text-center text-sm">
             <button
               type="button"
               onClick={onForgotPassword}
@@ -117,17 +117,6 @@ export function LoginForm({ onToggleMode, onForgotPassword }: LoginFormProps) {
             >
               Esqueceu sua senha?
             </button>
-            
-            <p className="text-muted-foreground">
-              Não tem uma conta?{" "}
-              <button
-                type="button"
-                onClick={onToggleMode}
-                className="text-primary hover:underline font-medium"
-              >
-                Criar conta
-              </button>
-            </p>
           </div>
         </CardFooter>
       </form>

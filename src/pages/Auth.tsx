@@ -2,14 +2,13 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Package } from "lucide-react";
 import { LoginForm } from "@/components/auth/LoginForm";
-import { SignUpForm } from "@/components/auth/SignUpForm";
 import { ForgotPasswordForm } from "@/components/auth/ForgotPasswordForm";
 import { PendingApprovalMessage } from "@/components/auth/PendingApprovalMessage";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 
-type AuthMode = "login" | "signup" | "forgot";
+type AuthMode = "login" | "forgot";
 
 export default function Auth() {
   const [mode, setMode] = useState<AuthMode>("login");
@@ -75,13 +74,9 @@ export default function Auth() {
         {/* Auth Forms */}
         {mode === "login" && (
           <LoginForm
-            onToggleMode={() => setMode("signup")}
+            onToggleMode={() => {}}
             onForgotPassword={() => setMode("forgot")}
           />
-        )}
-        
-        {mode === "signup" && (
-          <SignUpForm onToggleMode={() => setMode("login")} />
         )}
         
         {mode === "forgot" && (
