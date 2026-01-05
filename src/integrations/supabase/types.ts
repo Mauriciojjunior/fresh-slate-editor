@@ -240,7 +240,6 @@ export type Database = {
       profiles: {
         Row: {
           action_count: number | null
-          approved: boolean
           created_at: string
           email: string | null
           full_name: string | null
@@ -250,7 +249,6 @@ export type Database = {
         }
         Insert: {
           action_count?: number | null
-          approved?: boolean
           created_at?: string
           email?: string | null
           full_name?: string | null
@@ -260,7 +258,6 @@ export type Database = {
         }
         Update: {
           action_count?: number | null
-          approved?: boolean
           created_at?: string
           email?: string | null
           full_name?: string | null
@@ -349,7 +346,6 @@ export type Database = {
         }
         Returns: boolean
       }
-      is_user_approved: { Args: { user_id: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "user" | "read_only"
