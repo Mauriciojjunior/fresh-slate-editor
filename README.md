@@ -1,73 +1,245 @@
-# Welcome to your Lovable project
+# 📚 Sistema de Gerenciamento de Coleções
 
-## Project info teste
+Sistema completo para gerenciamento de coleções pessoais (livros, discos, bebidas e jogos de tabuleiro) com autenticação, controle de acesso baseado em papéis e painel administrativo.
 
-**URL**: https://lovable.dev/projects/6d76e91b-408a-4e03-a0c2-15b939ab40b0
+## 🚀 Tecnologias Utilizadas
 
-## How can I edit this code?
+- **Frontend**: React 18 + TypeScript + Vite
+- **Estilização**: Tailwind CSS + shadcn/ui
+- **Backend**: Supabase (PostgreSQL + Auth + Storage)
+- **Gerenciamento de Estado**: TanStack React Query
+- **Roteamento**: React Router DOM v6
+- **Gráficos**: Recharts
+- **Exportação**: jsPDF + jspdf-autotable + xlsx
 
-There are several ways of editing your application.
+## 📁 Estrutura do Projeto
 
-**Use Lovable**
+```
+src/
+├── components/
+│   ├── admin/           # Componentes do painel administrativo
+│   ├── auth/            # Componentes de autenticação
+│   ├── books/           # Formulários e listagens de livros
+│   ├── dashboard/       # Dashboard e estatísticas
+│   ├── drinks/          # Formulários e listagens de bebidas
+│   ├── games/           # Formulários e listagens de jogos
+│   ├── icons/           # Ícones coloridos customizados
+│   ├── layout/          # Layout, header e sidebar
+│   ├── records/         # Formulários e listagens de discos
+│   ├── reports/         # Página de relatórios
+│   ├── shared/          # Componentes reutilizáveis
+│   └── ui/              # Componentes shadcn/ui
+├── contexts/
+│   └── AuthContext.tsx  # Contexto de autenticação
+├── hooks/
+│   ├── usePermissions.ts   # Hook de permissões
+│   ├── useUserRole.ts      # Hook para obter papel do usuário
+│   └── use-mobile.tsx      # Hook para detecção mobile
+├── integrations/
+│   └── supabase/        # Cliente e tipos do Supabase
+├── pages/
+│   ├── admin/           # Páginas administrativas
+│   ├── Auth.tsx         # Página de login/recuperação
+│   ├── Bebidas.tsx      # Gestão de bebidas
+│   ├── Discos.tsx       # Gestão de discos
+│   ├── Exportacao.tsx   # Exportação de dados
+│   ├── Index.tsx        # Dashboard principal
+│   ├── Jogos.tsx        # Gestão de jogos
+│   ├── Livros.tsx       # Gestão de livros
+│   ├── Profile.tsx      # Perfil do usuário
+│   └── Relatorios.tsx   # Relatórios e análises
+├── types/
+│   └── auth.ts          # Tipos de autenticação e papéis
+└── lib/
+    └── utils.ts         # Utilitários gerais
+```
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/6d76e91b-408a-4e03-a0c2-15b939ab40b0) and start prompting.
+## 🔐 Sistema de Autenticação
 
-Changes made via Lovable will be committed automatically to this repo.
+### Funcionalidades
+- Login com email/senha
+- Cadastro de novos usuários
+- Recuperação de senha via email
+- Sessão persistente com refresh automático de tokens
 
-**Use your preferred IDE**
+### Fluxo de Autenticação
+1. Usuário acessa `/auth`
+2. Realiza login ou cadastro
+3. Sistema cria perfil automaticamente via trigger
+4. Redirecionamento para dashboard
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## 👥 Controle de Acesso (RBAC)
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### Papéis Disponíveis
 
-Follow these steps:
+| Papel | Descrição |
+|-------|-----------|
+| `admin` | Acesso total ao sistema |
+| `user` | Pode criar, editar e excluir itens |
+| `read_only` | Apenas visualização |
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+### Permissões por Papel
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+| Permissão | Admin | User | Read Only |
+|-----------|-------|------|-----------|
+| Visualizar coleções | ✅ | ✅ | ✅ |
+| Adicionar itens | ✅ | ✅ | ❌ |
+| Editar itens | ✅ | ✅ | ❌ |
+| Excluir itens | ✅ | ✅ | ❌ |
+| Gerenciar usuários | ✅ | ❌ | ❌ |
+| Painel administrativo | ✅ | ❌ | ❌ |
 
-# Step 3: Install the necessary dependencies.
-npm i
+## 📦 Módulos do Sistema
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+### 📚 Livros
+- Cadastro com título, autor, categoria, editora
+- Upload de imagem de capa
+- Filtros por categoria e status de leitura
+- Visualização em grid ou lista
+
+### 💿 Discos
+- Cadastro com título, artista, ano, gênero
+- Upload de imagem de capa
+- Filtros por gênero e década
+
+### 🍷 Bebidas
+- Cadastro com nome, tipo, safra, país, região
+- Controle de estoque com histórico
+- Tipos de uva associados
+- Filtros por tipo, país e disponibilidade
+
+### 🎲 Jogos de Tabuleiro
+- Cadastro com nome, número de jogadores, duração
+- Categoria e complexidade
+- Upload de imagem
+
+## 🛠️ Painel Administrativo
+
+### Funcionalidades
+- **Usuários**: Gerenciamento completo (criar, editar, excluir, alterar papéis)
+- **Categorias de Livros**: CRUD de categorias
+- **Tipos de Bebidas**: CRUD de tipos (vinho, cerveja, etc.)
+- **Tipos de Uva**: CRUD de variedades de uva
+- **Logs de Atividade**: Visualização de ações dos usuários
+- **Grupos de Permissão**: Documentação dos papéis
+
+### Acesso
+Apenas usuários com papel `admin` podem acessar `/admin`
+
+## 📊 Dashboard e Relatórios
+
+### Dashboard (`/`)
+- Estatísticas gerais de cada coleção
+- Gráfico de evolução temporal
+- Itens adicionados recentemente
+- Botão de adição rápida
+
+### Relatórios (`/relatorios`)
+- Análises detalhadas por categoria
+- Gráficos comparativos
+- Filtros por período
+
+## 📤 Exportação de Dados
+
+### Formatos Suportados
+- **Excel (.xlsx)**: Planilha com todos os dados
+- **PDF**: Documento formatado com imagens
+
+### Acesso
+Disponível em `/exportacao`
+
+## 🗄️ Banco de Dados (Supabase)
+
+### Tabelas Principais
+
+| Tabela | Descrição |
+|--------|-----------|
+| `profiles` | Perfis de usuários |
+| `user_roles` | Papéis dos usuários |
+| `books` | Coleção de livros |
+| `records` | Coleção de discos |
+| `drinks` | Coleção de bebidas |
+| `board_games` | Coleção de jogos |
+| `activity_logs` | Logs de atividades |
+
+### Buckets de Storage
+
+| Bucket | Descrição |
+|--------|-----------|
+| `book-images` | Capas de livros |
+| `record-images` | Capas de discos |
+| `drink-images` | Imagens de bebidas |
+| `game-images` | Imagens de jogos |
+
+### Segurança (RLS)
+- Todas as tabelas possuem Row Level Security habilitado
+- Políticas baseadas em autenticação
+- Funções de verificação de papel: `get_user_role()`, `has_role()`
+
+## 🔧 Configuração do Ambiente
+
+### Pré-requisitos
+- Node.js 18+
+- npm ou bun
+
+### Instalação
+
+```bash
+# Clonar o repositório
+git clone <URL_DO_REPOSITORIO>
+
+# Instalar dependências
+npm install
+
+# Iniciar servidor de desenvolvimento
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### Variáveis de Ambiente
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+O projeto utiliza as seguintes variáveis (gerenciadas pelo Lovable):
 
-**Use GitHub Codespaces**
+- `SUPABASE_URL` - URL do projeto Supabase
+- `SUPABASE_PUBLISHABLE_KEY` - Chave pública do Supabase
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## 🌐 Deploy
 
-## What technologies are used for this project?
+### Via Lovable
+1. Acesse o projeto em [Lovable](https://lovable.dev)
+2. Clique em **Share → Publish**
 
-This project is built with:
+### Configuração do Supabase (Importante!)
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+Para que o reset de senha funcione corretamente:
 
-## How can I deploy this project?
+1. Acesse o [Supabase Dashboard](https://supabase.com/dashboard)
+2. Vá em **Authentication → URL Configuration**
+3. Configure:
+   - **Site URL**: URL da sua aplicação (ex: `https://seu-app.lovableproject.com`)
+   - **Redirect URLs**: Adicione `https://seu-app.lovableproject.com/**`
 
-Simply open [Lovable](https://lovable.dev/projects/6d76e91b-408a-4e03-a0c2-15b939ab40b0) and click on Share -> Publish.
+## 📱 Design Responsivo
 
-## Can I connect a custom domain to my Lovable project?
+O sistema é totalmente responsivo:
+- **Desktop**: Sidebar fixa, grid de 4 colunas
+- **Tablet**: Sidebar recolhível, grid de 2-3 colunas
+- **Mobile**: Navegação por menu hambúrguer, grid de 1 coluna
 
-Yes, you can!
+## 🎨 Sistema de Design
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+### Cores Principais
+- **Primary**: Verde (#22c55e) - Ações principais
+- **Secondary**: Roxo - Elementos secundários
+- **Accent**: Rosa - Destaques
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+### Temas
+- Suporte a tema claro e escuro
+- Cores adaptadas automaticamente via CSS variables
+
+## 📄 Licença
+
+Este projeto foi desenvolvido usando [Lovable](https://lovable.dev).
+
+---
+
+**URL do Projeto**: https://lovable.dev/projects/6d76e91b-408a-4e03-a0c2-15b939ab40b0
