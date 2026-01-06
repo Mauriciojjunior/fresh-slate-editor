@@ -3,9 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { Package } from "lucide-react";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { ForgotPasswordForm } from "@/components/auth/ForgotPasswordForm";
+import { ResetPasswordForm } from "@/components/auth/ResetPasswordForm";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
-type AuthMode = "login" | "forgot";
+type AuthMode = "login" | "forgot" | "reset";
 
 export default function Auth() {
   const [mode, setMode] = useState<AuthMode>("login");
@@ -13,11 +15,27 @@ export default function Auth() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Redirect to home if user is authenticated
-    if (user && !loading) {
+    // Check if this is a password recovery session
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "PASSWORD_RECOVERY") {
+        setMode("reset");
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    // Redirect to home if user is authenticated and not in reset mode
+    if (user && !loading && mode !== "reset") {
       navigate("/");
     }
-  }, [user, loading, navigate]);
+  }, [user, loading, navigate, mode]);
+
+  const handleResetSuccess = async () => {
+    await supabase.auth.signOut();
+    setMode("login");
+  };
 
   // Show loading while checking auth state
   if (loading) {
@@ -43,7 +61,9 @@ export default function Auth() {
             Sistema de Inventário
           </h1>
           <p className="text-muted-foreground">
-            Gerencie seus itens de forma eficiente
+            {mode === "reset" 
+              ? "Redefina sua senha de acesso" 
+              : "Gerencie seus itens de forma eficiente"}
           </p>
         </div>
 
@@ -57,6 +77,10 @@ export default function Auth() {
         
         {mode === "forgot" && (
           <ForgotPasswordForm onBack={() => setMode("login")} />
+        )}
+
+        {mode === "reset" && (
+          <ResetPasswordForm onSuccess={handleResetSuccess} />
         )}
       </div>
     </div>
