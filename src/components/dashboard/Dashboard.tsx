@@ -270,89 +270,148 @@ export function Dashboard() {
 
       {/* Stats Overview */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card 
-          className="lg:col-span-2 bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20 cursor-pointer hover:shadow-lg transition-all"
-          onClick={() => setStatsModalOpen(true)}
-        >
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-2xl font-bold text-primary">Total de Itens</h3>
-                <p className="text-muted-foreground">Clique para ver detalhes</p>
+        {/* Recent Items - Main Area */}
+        <Card className="lg:col-span-2">
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-2">
+              <div className="p-2 rounded-lg bg-primary/10">
+                <Clock className="h-5 w-5 text-primary" />
               </div>
-              <div className="text-right">
-                <div className="text-4xl font-bold text-primary">{totalItems}</div>
-                {totalItems > 0 && (
-                  <div className="flex items-center text-sm text-emerald-600 mt-1">
-                    <TrendingUp className="h-4 w-4 mr-1" />
-                    Crescendo
-                  </div>
-                )}
+              <div>
+                <CardTitle className="text-lg">Últimos Itens Adicionados</CardTitle>
+                <CardDescription>Novidades na coleção</CardDescription>
               </div>
             </div>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {recentItems.length > 0 ? (
+              recentItems.map((item) => (
+                <div 
+                  key={`${item.category}-${item.id}`}
+                  className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+                >
+                  <div className="h-12 w-12 rounded-lg bg-background border overflow-hidden flex-shrink-0">
+                    {item.image_url ? (
+                      <img 
+                        src={item.image_url} 
+                        alt={item.name}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="h-full w-full flex items-center justify-center text-muted-foreground text-xs">
+                        Sem foto
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm truncate">{item.name}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Badge variant="secondary" className="text-xs">
+                        {item.category}
+                      </Badge>
+                      <span className="text-xs text-muted-foreground">
+                        {formatDistanceToNow(new Date(item.created_at), {
+                          addSuffix: true,
+                          locale: ptBR
+                        })}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <Clock className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                <p className="text-sm">Nenhum item adicionado ainda</p>
+              </div>
+            )}
           </CardContent>
         </Card>
 
-        {/* Top 5 Drinks to Buy */}
-        {drinksToBuy.length > 0 && (
-          <Card className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 border-green-200 dark:border-green-800">
-            <CardHeader className="pb-3">
-              <div className="flex items-center gap-2">
-                <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/30">
-                  <ShoppingCart className="h-5 w-5 text-green-600 dark:text-green-400" />
-                </div>
+        {/* Sidebar with Total and Drinks to Buy */}
+        <div className="space-y-6">
+          {/* Total de Itens - Compact */}
+          <Card 
+            className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20 cursor-pointer hover:shadow-lg transition-all"
+            onClick={() => setStatsModalOpen(true)}
+          >
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-base text-green-800 dark:text-green-200">
-                    Bebidas que precisam ser compradas
-                  </CardTitle>
-                  <CardDescription className="text-xs text-green-600 dark:text-green-400">
-                    Top 5 mais urgentes
-                  </CardDescription>
+                  <h3 className="text-sm font-semibold text-primary">Total de Itens</h3>
+                  <p className="text-xs text-muted-foreground">Clique para detalhes</p>
+                </div>
+                <div className="text-right">
+                  <div className="text-2xl font-bold text-primary">{totalItems}</div>
+                  {totalItems > 0 && (
+                    <div className="flex items-center text-xs text-emerald-600">
+                      <TrendingUp className="h-3 w-3 mr-1" />
+                      Crescendo
+                    </div>
+                  )}
                 </div>
               </div>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {drinksToBuy.map((drink) => (
-                <div 
-                  key={drink.id}
-                  className="flex items-start justify-between p-3 rounded-lg bg-white/50 dark:bg-green-950/10 border border-green-100 dark:border-green-900/30"
-                >
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm text-green-900 dark:text-green-100 truncate">
-                      {drink.name}
-                    </p>
-                    <p className="text-xs text-green-600 dark:text-green-400">
-                      {drink.drink_types.name}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-1 text-xs text-green-700 dark:text-green-300 ml-2">
-                    <Clock className="h-3 w-3" />
-                    <span className="whitespace-nowrap">
-                      {formatDistanceToNow(new Date(drink.needs_to_buy_marked_at), {
-                        addSuffix: true,
-                        locale: ptBR
-                      })}
-                    </span>
-                  </div>
-                </div>
-              ))}
-              <Button 
-                asChild 
-                variant="outline" 
-                size="sm"
-                className="w-full mt-2 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/30"
-              >
-                <Link to="/bebidas">
-                  Ver todas as bebidas
-                  <ArrowRight className="h-3 w-3 ml-2" />
-                </Link>
-              </Button>
             </CardContent>
           </Card>
-        )}
 
-        {/* Recent Items Card */}
-        <RecentItemsCard items={recentItems} />
+          {/* Top 5 Drinks to Buy */}
+          {drinksToBuy.length > 0 && (
+            <Card className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 border-green-200 dark:border-green-800">
+              <CardHeader className="pb-3">
+                <div className="flex items-center gap-2">
+                  <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/30">
+                    <ShoppingCart className="h-5 w-5 text-green-600 dark:text-green-400" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-base text-green-800 dark:text-green-200">
+                      Bebidas para comprar
+                    </CardTitle>
+                    <CardDescription className="text-xs text-green-600 dark:text-green-400">
+                      Top 5 mais urgentes
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {drinksToBuy.map((drink) => (
+                  <div 
+                    key={drink.id}
+                    className="flex items-start justify-between p-3 rounded-lg bg-white/50 dark:bg-green-950/10 border border-green-100 dark:border-green-900/30"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm text-green-900 dark:text-green-100 truncate">
+                        {drink.name}
+                      </p>
+                      <p className="text-xs text-green-600 dark:text-green-400">
+                        {drink.drink_types.name}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1 text-xs text-green-700 dark:text-green-300 ml-2">
+                      <Clock className="h-3 w-3" />
+                      <span className="whitespace-nowrap">
+                        {formatDistanceToNow(new Date(drink.needs_to_buy_marked_at), {
+                          addSuffix: true,
+                          locale: ptBR
+                        })}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+                <Button 
+                  asChild 
+                  variant="outline" 
+                  size="sm"
+                  className="w-full mt-2 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/30"
+                >
+                  <Link to="/bebidas">
+                    Ver todas as bebidas
+                    <ArrowRight className="h-3 w-3 ml-2" />
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       </div>
 
       {/* Evolution Chart */}
