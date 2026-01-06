@@ -215,50 +215,51 @@ export function Dashboard() {
   const totalItems = counts.books + counts.records + counts.drinks + counts.boardGames;
 
   return (
-    <div className="space-y-4 pb-16">
+    <div className="space-y-8 pb-20">
       {/* Header */}
-      <div className="text-center space-y-1">
-        <h1 className="text-2xl font-bold text-foreground">
+      <div className="text-center space-y-4">
+        <h1 className="text-4xl font-bold text-foreground">
           Meu Inventário
         </h1>
-        <p className="text-sm text-muted-foreground">
-          Gerencie suas coleções pessoais
+        <p className="text-xl text-muted-foreground">
+          Gerencie suas coleções pessoais em um só lugar
         </p>
       </div>
 
-      {/* Collection Cards - Compact */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      {/* Collection Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {collections.map((collection, index) => {
           const ColorIcon = collection.ColorIcon;
           
           return (
             <Card 
               key={collection.title} 
-              className="group hover:shadow-lg transition-all duration-200 hover:-translate-y-1 animate-fade-in overflow-hidden"
-              style={{ animationDelay: `${index * 50}ms` }}
+              className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 animate-fade-in overflow-hidden"
+              style={{ animationDelay: `${index * 100}ms` }}
             >
-              <CardHeader className="p-3 pb-2">
+              <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
-                  <div className={`h-12 w-12 rounded-lg ${collection.bgGradient} shadow p-2 group-hover:scale-105 transition-transform duration-200`}>
+                  <div className={`h-24 w-24 rounded-xl ${collection.bgGradient} shadow-lg p-3 group-hover:scale-110 transition-transform duration-300`}>
                     <ColorIcon />
                   </div>
                   <div className="text-right">
                     {loading ? (
-                      <div className="animate-pulse bg-muted h-6 w-6 rounded"></div>
+                      <div className="animate-pulse bg-muted h-8 w-8 rounded"></div>
                     ) : (
-                      <div className="text-2xl font-bold text-foreground">
+                      <div className="text-3xl font-bold text-foreground">
                         {collection.count}
                       </div>
                     )}
                   </div>
                 </div>
-                <CardTitle className="text-sm mt-2">{collection.title}</CardTitle>
+                <CardTitle className="text-lg">{collection.title}</CardTitle>
+                <CardDescription>{collection.description}</CardDescription>
               </CardHeader>
-              <CardContent className="p-3 pt-0">
-                <Button asChild variant="outline" size="sm" className="w-full text-xs group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-200">
-                  <Link to={collection.link} className="flex items-center justify-center">
+              <CardContent className="pt-0">
+                <Button asChild variant="outline" className="w-full group-hover:bg-gradient-to-r group-hover:from-primary group-hover:to-primary/80 group-hover:text-primary-foreground transition-all duration-300 border-2">
+                  <Link to={collection.link} className="flex items-center justify-center font-semibold">
                     Ver Coleção
-                    <ArrowRight className="h-3 w-3 ml-1 group-hover:translate-x-0.5 transition-transform" />
+                    <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
                   </Link>
                 </Button>
               </CardContent>
@@ -268,23 +269,28 @@ export function Dashboard() {
       </div>
 
       {/* Stats Overview */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Recent Items - Main Area */}
         <Card className="lg:col-span-2">
-          <CardHeader className="p-4 pb-2">
+          <CardHeader className="pb-3">
             <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4 text-primary" />
-              <CardTitle className="text-sm">Últimos Itens Adicionados</CardTitle>
+              <div className="p-2 rounded-lg bg-primary/10">
+                <Clock className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <CardTitle className="text-lg">Últimos Itens Adicionados</CardTitle>
+                <CardDescription>Novidades na coleção</CardDescription>
+              </div>
             </div>
           </CardHeader>
-          <CardContent className="p-4 pt-2 space-y-2">
+          <CardContent className="space-y-3">
             {recentItems.length > 0 ? (
               recentItems.map((item) => (
                 <div 
                   key={`${item.category}-${item.id}`}
-                  className="flex items-center gap-2 p-2 rounded-md bg-muted/50 hover:bg-muted transition-colors"
+                  className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
                 >
-                  <div className="h-10 w-10 rounded-md bg-background border overflow-hidden flex-shrink-0">
+                  <div className="h-12 w-12 rounded-lg bg-background border overflow-hidden flex-shrink-0">
                     {item.image_url ? (
                       <img 
                         src={item.image_url} 
@@ -292,18 +298,18 @@ export function Dashboard() {
                         className="h-full w-full object-cover"
                       />
                     ) : (
-                      <div className="h-full w-full flex items-center justify-center text-muted-foreground text-[10px]">
-                        —
+                      <div className="h-full w-full flex items-center justify-center text-muted-foreground text-xs">
+                        Sem foto
                       </div>
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-xs truncate">{item.name}</p>
-                    <div className="flex items-center gap-1.5">
-                      <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+                    <p className="font-medium text-sm truncate">{item.name}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Badge variant="secondary" className="text-xs">
                         {item.category}
                       </Badge>
-                      <span className="text-[10px] text-muted-foreground">
+                      <span className="text-xs text-muted-foreground">
                         {formatDistanceToNow(new Date(item.created_at), {
                           addSuffix: true,
                           locale: ptBR
@@ -314,83 +320,98 @@ export function Dashboard() {
                 </div>
               ))
             ) : (
-              <div className="text-center py-4 text-muted-foreground">
-                <Clock className="h-6 w-6 mx-auto mb-1 opacity-50" />
-                <p className="text-xs">Nenhum item adicionado ainda</p>
+              <div className="text-center py-8 text-muted-foreground">
+                <Clock className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                <p className="text-sm">Nenhum item adicionado ainda</p>
               </div>
             )}
           </CardContent>
         </Card>
 
-        {/* Drinks to Buy - Sidebar */}
-        {drinksToBuy.length > 0 && (
-          <Card className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 border-green-200 dark:border-green-800">
-            <CardHeader className="p-4 pb-2">
-              <div className="flex items-center gap-2">
-                <ShoppingCart className="h-4 w-4 text-green-600 dark:text-green-400" />
-                <CardTitle className="text-sm text-green-800 dark:text-green-200">
-                  Bebidas para comprar
-                </CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent className="p-4 pt-2 space-y-2">
-              {drinksToBuy.map((drink) => (
-                <div 
-                  key={drink.id}
-                  className="flex items-center justify-between p-2 rounded-md bg-white/50 dark:bg-green-950/10 border border-green-100 dark:border-green-900/30"
-                >
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-xs text-green-900 dark:text-green-100 truncate">
-                      {drink.name}
-                    </p>
-                    <p className="text-[10px] text-green-600 dark:text-green-400">
-                      {drink.drink_types.name}
-                    </p>
+        <div className="space-y-6">
+
+          {/* Top 5 Drinks to Buy */}
+          {drinksToBuy.length > 0 && (
+            <Card className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 border-green-200 dark:border-green-800">
+              <CardHeader className="pb-3">
+                <div className="flex items-center gap-2">
+                  <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/30">
+                    <ShoppingCart className="h-5 w-5 text-green-600 dark:text-green-400" />
                   </div>
-                  <span className="text-[10px] text-green-700 dark:text-green-300 ml-2 whitespace-nowrap">
-                    {formatDistanceToNow(new Date(drink.needs_to_buy_marked_at), {
-                      addSuffix: true,
-                      locale: ptBR
-                    })}
-                  </span>
+                  <div>
+                    <CardTitle className="text-base text-green-800 dark:text-green-200">
+                      Bebidas para comprar
+                    </CardTitle>
+                    <CardDescription className="text-xs text-green-600 dark:text-green-400">
+                      Top 5 mais urgentes
+                    </CardDescription>
+                  </div>
                 </div>
-              ))}
-              <Button 
-                asChild 
-                variant="outline" 
-                size="sm"
-                className="w-full text-xs border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/30"
-              >
-                <Link to="/bebidas">
-                  Ver todas
-                  <ArrowRight className="h-3 w-3 ml-1" />
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
-        )}
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {drinksToBuy.map((drink) => (
+                  <div 
+                    key={drink.id}
+                    className="flex items-start justify-between p-3 rounded-lg bg-white/50 dark:bg-green-950/10 border border-green-100 dark:border-green-900/30"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm text-green-900 dark:text-green-100 truncate">
+                        {drink.name}
+                      </p>
+                      <p className="text-xs text-green-600 dark:text-green-400">
+                        {drink.drink_types.name}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1 text-xs text-green-700 dark:text-green-300 ml-2">
+                      <Clock className="h-3 w-3" />
+                      <span className="whitespace-nowrap">
+                        {formatDistanceToNow(new Date(drink.needs_to_buy_marked_at), {
+                          addSuffix: true,
+                          locale: ptBR
+                        })}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+                <Button 
+                  asChild 
+                  variant="outline" 
+                  size="sm"
+                  className="w-full mt-2 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/30"
+                >
+                  <Link to="/bebidas">
+                    Ver todas as bebidas
+                    <ArrowRight className="h-3 w-3 ml-2" />
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       </div>
 
       {/* Evolution Chart */}
       {totalItems > 0 && monthlyData.length > 0 && (
-        <DashboardEvolutionChart data={monthlyData} />
+        <div className="grid grid-cols-1 gap-6">
+          <DashboardEvolutionChart data={monthlyData} />
+        </div>
       )}
 
       {/* Quick Actions */}
       {totalItems === 0 && (
         <Card className="border-dashed border-2 border-muted-foreground/25">
-          <CardContent className="p-6 text-center">
-            <div className="space-y-3">
-              <div className="text-4xl">📚</div>
-              <h3 className="text-base font-semibold">Comece sua primeira coleção</h3>
-              <p className="text-sm text-muted-foreground">
-                Adicione seus primeiros itens
+          <CardContent className="p-8 text-center">
+            <div className="space-y-4">
+              <div className="text-6xl">📚</div>
+              <h3 className="text-xl font-semibold">Comece sua primeira coleção</h3>
+              <p className="text-muted-foreground max-w-md mx-auto">
+                Adicione seus primeiros itens e comece a organizar suas coleções pessoais
               </p>
-              <div className="flex flex-wrap justify-center gap-2 mt-4">
+              <div className="flex flex-wrap justify-center gap-3 mt-6">
                 {collections.map((collection) => (
-                  <Button key={collection.title} asChild variant="outline" size="sm" className="text-xs">
+                  <Button key={collection.title} asChild variant="outline" size="sm">
                     <Link to={collection.link}>
-                      <collection.icon className="h-3 w-3 mr-1" />
+                      <collection.icon className="h-4 w-4 mr-2" />
                       {collection.title}
                     </Link>
                   </Button>
@@ -404,17 +425,17 @@ export function Dashboard() {
       {/* Reports Section */}
       {totalItems > 0 && (
         <Card className="bg-gradient-to-r from-secondary/30 to-secondary/10 border-primary/20">
-          <CardContent className="p-4">
+          <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-semibold">Relatórios Detalhados</h3>
-                <p className="text-xs text-muted-foreground">
-                  Gráficos e estatísticas
+                <h3 className="text-xl font-semibold mb-2">Relatórios Detalhados</h3>
+                <p className="text-muted-foreground">
+                  Visualize gráficos e estatísticas das suas coleções
                 </p>
               </div>
-              <Button asChild size="sm" className="text-xs">
+              <Button asChild>
                 <Link to="/relatorios" className="flex items-center">
-                  <BarChart3 className="h-3 w-3 mr-1" />
+                  <BarChart3 className="h-4 w-4 mr-2" />
                   Ver Relatórios
                 </Link>
               </Button>
