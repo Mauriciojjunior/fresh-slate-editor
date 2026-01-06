@@ -328,31 +328,7 @@ export function Dashboard() {
           </CardContent>
         </Card>
 
-        {/* Sidebar with Total and Drinks to Buy */}
         <div className="space-y-6">
-          {/* Total de Itens - Compact */}
-          <Card 
-            className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20 cursor-pointer hover:shadow-lg transition-all"
-            onClick={() => setStatsModalOpen(true)}
-          >
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-sm font-semibold text-primary">Total de Itens</h3>
-                  <p className="text-xs text-muted-foreground">Clique para detalhes</p>
-                </div>
-                <div className="text-right">
-                  <div className="text-2xl font-bold text-primary">{totalItems}</div>
-                  {totalItems > 0 && (
-                    <div className="flex items-center text-xs text-emerald-600">
-                      <TrendingUp className="h-3 w-3 mr-1" />
-                      Crescendo
-                    </div>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
 
           {/* Top 5 Drinks to Buy */}
           {drinksToBuy.length > 0 && (
