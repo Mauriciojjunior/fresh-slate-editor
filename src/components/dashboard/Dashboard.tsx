@@ -121,10 +121,10 @@ export function Dashboard() {
   const fetchRecentItems = async () => {
     try {
       const [books, records, drinks, games] = await Promise.all([
-        supabase.from('books').select('id, title, image_url, created_at').order('created_at', { ascending: false }).limit(2),
-        supabase.from('records').select('id, album, image_url, created_at').order('created_at', { ascending: false }).limit(2),
-        supabase.from('drinks').select('id, name, image_url, created_at').order('created_at', { ascending: false }).limit(2),
-        supabase.from('board_games').select('id, name, image_url, created_at').order('created_at', { ascending: false }).limit(2),
+        supabase.from('books').select('id, title, image_url, created_at').order('created_at', { ascending: false }).limit(6),
+        supabase.from('records').select('id, album, image_url, created_at').order('created_at', { ascending: false }).limit(6),
+        supabase.from('drinks').select('id, name, image_url, created_at').order('created_at', { ascending: false }).limit(6),
+        supabase.from('board_games').select('id, name, image_url, created_at').order('created_at', { ascending: false }).limit(6),
       ]);
 
       const allItems: RecentItem[] = [
@@ -135,7 +135,7 @@ export function Dashboard() {
       ];
 
       allItems.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-      setRecentItems(allItems.slice(0, 5));
+      setRecentItems(allItems.slice(0, 6));
     } catch (error: any) {
       console.error('Error fetching recent items:', error);
     }
@@ -268,24 +268,23 @@ export function Dashboard() {
         })}
       </div>
 
-      {/* Stats Overview */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Recent Items - Main Area */}
-        <Card className="lg:col-span-2">
-          <CardHeader className="pb-3">
-            <div className="flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-primary/10">
-                <Clock className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <CardTitle className="text-lg">Últimos Itens Adicionados</CardTitle>
-                <CardDescription>Novidades na coleção</CardDescription>
-              </div>
+      {/* Recent Items - Full Width */}
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex items-center gap-2">
+            <div className="p-2 rounded-lg bg-primary/10">
+              <Clock className="h-5 w-5 text-primary" />
             </div>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {recentItems.length > 0 ? (
-              recentItems.map((item) => (
+            <div>
+              <CardTitle className="text-lg">Últimos Itens Adicionados</CardTitle>
+              <CardDescription>Novidades na coleção</CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {recentItems.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {recentItems.map((item) => (
                 <div 
                   key={`${item.category}-${item.id}`}
                   className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
@@ -318,51 +317,50 @@ export function Dashboard() {
                     </div>
                   </div>
                 </div>
-              ))
-            ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                <Clock className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                <p className="text-sm">Nenhum item adicionado ainda</p>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">
+              <Clock className="h-8 w-8 mx-auto mb-2 opacity-50" />
+              <p className="text-sm">Nenhum item adicionado ainda</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Drinks to Buy */}
+      {drinksToBuy.length > 0 && (
+        <Card className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 border-green-200 dark:border-green-800">
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-2">
+              <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/30">
+                <ShoppingCart className="h-5 w-5 text-green-600 dark:text-green-400" />
               </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <div className="space-y-6">
-
-          {/* Top 5 Drinks to Buy */}
-          {drinksToBuy.length > 0 && (
-            <Card className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 border-green-200 dark:border-green-800">
-              <CardHeader className="pb-3">
-                <div className="flex items-center gap-2">
-                  <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/30">
-                    <ShoppingCart className="h-5 w-5 text-green-600 dark:text-green-400" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-base text-green-800 dark:text-green-200">
-                      Bebidas para comprar
-                    </CardTitle>
-                    <CardDescription className="text-xs text-green-600 dark:text-green-400">
-                      Top 5 mais urgentes
-                    </CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {drinksToBuy.map((drink) => (
-                  <div 
-                    key={drink.id}
-                    className="flex items-start justify-between p-3 rounded-lg bg-white/50 dark:bg-green-950/10 border border-green-100 dark:border-green-900/30"
-                  >
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm text-green-900 dark:text-green-100 truncate">
-                        {drink.name}
-                      </p>
-                      <p className="text-xs text-green-600 dark:text-green-400">
-                        {drink.drink_types.name}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-1 text-xs text-green-700 dark:text-green-300 ml-2">
+              <div>
+                <CardTitle className="text-base text-green-800 dark:text-green-200">
+                  Bebidas para comprar
+                </CardTitle>
+                <CardDescription className="text-xs text-green-600 dark:text-green-400">
+                  Top 5 mais urgentes
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+              {drinksToBuy.map((drink) => (
+                <div 
+                  key={drink.id}
+                  className="flex items-start justify-between p-3 rounded-lg bg-white/50 dark:bg-green-950/10 border border-green-100 dark:border-green-900/30"
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm text-green-900 dark:text-green-100 truncate">
+                      {drink.name}
+                    </p>
+                    <p className="text-xs text-green-600 dark:text-green-400">
+                      {drink.drink_types.name}
+                    </p>
+                    <div className="flex items-center gap-1 text-xs text-green-700 dark:text-green-300 mt-1">
                       <Clock className="h-3 w-3" />
                       <span className="whitespace-nowrap">
                         {formatDistanceToNow(new Date(drink.needs_to_buy_marked_at), {
@@ -372,23 +370,23 @@ export function Dashboard() {
                       </span>
                     </div>
                   </div>
-                ))}
-                <Button 
-                  asChild 
-                  variant="outline" 
-                  size="sm"
-                  className="w-full mt-2 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/30"
-                >
-                  <Link to="/bebidas">
-                    Ver todas as bebidas
-                    <ArrowRight className="h-3 w-3 ml-2" />
-                  </Link>
-                </Button>
-              </CardContent>
-            </Card>
-          )}
-        </div>
-      </div>
+                </div>
+              ))}
+            </div>
+            <Button 
+              asChild 
+              variant="outline" 
+              size="sm"
+              className="w-full mt-4 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/30"
+            >
+              <Link to="/bebidas">
+                Ver todas as bebidas
+                <ArrowRight className="h-3 w-3 ml-2" />
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Evolution Chart */}
       {totalItems > 0 && monthlyData.length > 0 && (
