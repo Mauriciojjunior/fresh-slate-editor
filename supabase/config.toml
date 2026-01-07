@@ -1,1 +1,7 @@
-project_id = "EXAMPLE"
+project_id = "vbequimwiuzbltaiftrz"
+
+[functions.api]
+verify_jwt = false
+
+[functions.storage]
+verify_jwt = false
